@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="zh">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="./resources/ol.css">
+        <link rel="stylesheet" href="resources/fontawesome-all.min.css">
+        <link href="resources/photon-geocoder-autocomplete.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="./resources/ol-layerswitcher.css">
+        <link rel="stylesheet" href="./resources/qgis2web.css">
+        <style>
+        html, body { background-color: #ffffff; }
+        .ol-control > * { background-color: #f8f8f8!important; color: #444444!important; border-radius: 0px; }
+        .ol-attribution a, .gcd-gl-input::placeholder, .search-layer-input-search::placeholder { color: #444444!important; }
+        .search-layer-input-search { background-color: #f8f8f8!important; }
+        .ol-control > *:focus, .ol-control >*:hover { background-color: rgba(248, 248, 248, 0.7)!important; }
+        .ol-control { background-color: rgba(255,255,255,.4) !important; padding: 2px !important; }
+        html, body, #map { width: 100%; height: 100%; padding: 0; margin: 0; }
+        #filter-panel {
+            position: absolute; top: 10px; right: 10px; z-index: 1000;
+            background: white; padding: 15px; border: 1px solid #ccc;
+            border-radius: 5px; max-height: 80vh; overflow-y: auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2); font-family: Arial, sans-serif;
+            width: 300px;
+        }
+        #filter-panel h4 { margin: 0 0 10px 0; font-size: 16px; }
+        #filter-panel strong { display: block; margin-bottom: 5px; }
+        #filter-panel label { display: block; margin: 3px 0; font-size: 14px; }
+        .input-search {
+            width: 100%; padding: 6px; margin-top: 5px; box-sizing: border-box;
+        }
+        .button-group {
+            display: flex; gap: 10px; margin-top: 15px;
+        }
+        .button-group button {
+            flex: 1; padding: 8px 12px; border: none; border-radius: 4px;
+            cursor: pointer; font-size: 14px; color: white;
+        }
+        #reset-btn { background: #28a745; }
+        #reset-btn:hover { background: #218838; }
+        #clear-btn { background: #dc3545; }
+        #clear-btn:hover { background: #c82333; }
+        /* 隱藏/開啟按鈕樣式 */
+        #toggle-filter-btn {
+            position: absolute; top: 10px; right: 10px; z-index: 1100;
+            padding: 8px 12px; background: #007bff; color: white;
+            border: none; border-radius: 4px; cursor: pointer;
+            font-size: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        #toggle-filter-btn:hover { background: #0056b3; }
+        </style>
+        <title>歷代古建築地圖</title>
+    </head>
+    <body>
+        <!-- 隱藏/開啟篩選的浮動按鈕 -->
+        <button id="toggle-filter-btn">隱藏篩選</button>
+
+        <div id="map">
+            <div id="popup" class="ol-popup">
+                <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+                <div id="popup-content"></div>
+            </div>
+        </div>
+
+        <!-- 篩選面板 -->
+        <div id="filter-panel">
+            <h4>篩選條件</h4>
+
+            <!-- 國家 -->
+            <div style="margin-bottom:15px;">
+                <strong>國家</strong><br>
+                <label><input type="checkbox" class="filter-country" value="CN" checked> CN (中國)</label>
+            </div>
+
+            <!-- 政權 -->
+            <div style="margin-bottom:15px;">
+                <strong>政權</strong>
+                <label><input type="checkbox" class="filter-regime" value="唐" checked> 唐</label>
+                <label><input type="checkbox" class="filter-regime" value="後唐" checked> 後唐</label>
+                <label><input type="checkbox" class="filter-regime" value="後晉" checked> 後晉</label>
+                <label><input type="checkbox" class="filter-regime" value="五代" checked> 五代</label>
+                <label><input type="checkbox" class="filter-regime" value="後周" checked> 後周</label>
+                <label><input type="checkbox" class="filter-regime" value="北漢" checked> 北漢</label>
+                <label><input type="checkbox" class="filter-regime" value="歸義軍" checked> 歸義軍</label>
+                <label><input type="checkbox" class="filter-regime" value="吳越國" checked> 吳越國</label>
+                <label><input type="checkbox" class="filter-regime" value="北宋" checked> 北宋</label>
+                <label><input type="checkbox" class="filter-regime" value="遼" checked> 遼</label>
+		<label><input type="checkbox" class="filter-regime" value="金" checked> 金</label>
+                <label><input type="checkbox" class="filter-regime" value="南宋" checked> 南宋</label>
+                <label><input type="checkbox" class="filter-regime" value="大蒙古國" checked> 大蒙古國</label>
+                <label><input type="checkbox" class="filter-regime" value="元" checked> 元</label>
+                <label><input type="checkbox" class="filter-regime" value="明" checked> 明</label>
+                <label><input type="checkbox" class="filter-regime" value="南明" checked> 南明</label>
+                <label><input type="checkbox" class="filter-regime" value="後金" checked> 後金</label>
+                <label><input type="checkbox" class="filter-regime" value="清" checked> 清</label>
+                <label><input type="checkbox" class="filter-regime" value="其他" checked> 其他</label>
+
+                <!-- 政權專屬消除按鈕 -->
+                <button id="clear-regime-btn" onclick="window.clearRegimeFilters()" style="margin-top:8px; padding:6px 12px; background:#dc3545; color:white; border:none; border-radius:4px; cursor:pointer; font-size:13px; width:100%;">
+                    政權 - 消除所有點選
+                </button>
+            </div>
+
+            <!-- 地區 -->
+            <div style="margin-bottom:15px;">
+                <strong>地區</strong>
+                <label><input type="checkbox" class="filter-region" value="西北" checked> 西北</label>
+                <label><input type="checkbox" class="filter-region" value="華北" checked> 華北</label>
+                <label><input type="checkbox" class="filter-region" value="華南" checked> 華南</label>
+                <label><input type="checkbox" class="filter-region" value="華東" checked> 華東</label>
+                <label><input type="checkbox" class="filter-region" value="華中" checked> 華中</label>
+                <label><input type="checkbox" class="filter-region" value="蒙古" checked> 蒙古</label>
+                <label><input type="checkbox" class="filter-region" value="東北" checked> 東北</label>
+                <label><input type="checkbox" class="filter-region" value="西南" checked> 西南</label>
+                <label><input type="checkbox" class="filter-region" value="其他" checked> 其他</label>
+            </div>
+
+            <!-- 類型（輸入搜尋） -->
+            <div style="margin-bottom:15px;">
+                <strong>類型（輸入搜尋）</strong>
+                <input type="text" id="type-search" placeholder="例如：樓閣、塔、殿堂" class="input-search">
+            </div>
+
+            <!-- 斗拱輸入搜尋 -->
+            <div style="margin-bottom:15px;">
+                <strong>斗拱（輸入搜尋）</strong>
+                <input type="text" id="dougong-search" placeholder="例如：重簷、單檐" class="input-search">
+            </div>
+
+            <!-- 宗教輸入搜尋 -->
+            <div style="margin-bottom:15px;">
+                <strong>宗教（輸入搜尋）</strong>
+                <input type="text" id="religion-search" placeholder="例如：佛教、道教" class="input-search">
+            </div>
+
+            <!-- 公元輸入搜尋（數字篩選） -->
+            <div style="margin-bottom:15px;">
+                <strong>公元（數字篩選）</strong>
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                    <select id="year-operator" style="padding:6px; font-size:14px;">
+                        <option value="=">等於 (=)</option>
+                        <option value=">">大於 (>)</option>
+                        <option value="<">小於 (<)</option>
+                        <option value="-">範圍 (-)</option>
+                    </select>
+                    <input type="text" id="year-search" placeholder="例如：964 或 1100-1200" class="input-search" style="flex:1;">
+                </div>
+            </div>
+
+            <!-- 外形輸入搜尋 -->
+            <div style="margin-bottom:15px;">
+                <strong>外形（輸入搜尋）</strong>
+                <input type="text" id="shape-search" placeholder="例如：單檐、重簷、歇山" class="input-search">
+            </div>
+
+            <!-- 功能輸入搜尋 -->
+            <div style="margin-bottom:15px;">
+                <strong>功能（輸入搜尋）</strong>
+                <input type="text" id="function-search" placeholder="例如：主殿、寺廟" class="input-search">
+            </div>
+
+            <!-- 按鈕群組 -->
+            <div class="button-group">
+                <button id="reset-btn" onclick="window.resetFilters()">重置（全選）</button>
+                <button id="clear-btn" onclick="window.clearAllFilters()">消除所有點選</button>
+            </div>
+        </div>
+
+        <script src="resources/qgis2web_expressions.js"></script>
+        <script src="./resources/functions.js"></script>
+        <script src="./resources/ol.js"></script>
+        <script src="./resources/ol-layerswitcher.js"></script>
+        <script src="resources/photon-geocoder-autocomplete.min.js"></script>
+        <script src="layers/test2_1.js"></script>
+        <script src="styles/test2_1_style.js"></script>
+        <script src="./layers/layers.js" type="text/javascript"></script>
+        <script src="./resources/Autolinker.min.js"></script>
+        <script src="./resources/qgis2web.js"></script>
+
+        <!-- 篩選邏輯 -->
+        <script>
+            window.addEventListener('load', function() {
+                // debug: 輸出圖層名稱
+                console.log('=== 所有圖層列表 ===');
+                map.getLayers().getArray().forEach((layer, index) => {
+                    const title = layer.get('title') || layer.get('name') || '無名稱';
+                    console.log(`索引 ${index}: title="${title}"`);
+                });
+
+                // 找點位圖層
+                let pointLayer = null;
+                map.getLayers().getArray().forEach(layer => {
+                    const title = layer.get('title') || layer.get('name') || '';
+                    if (title.includes('test2_1') || title.includes('output') || title.includes('古建築')) {
+                        pointLayer = layer;
+                        console.log('找到點位圖層：', title);
+                    }
+                });
+
+                if (!pointLayer) {
+                    console.error('找不到點位圖層！');
+                    return;
+                }
+
+                // 隱藏/開啟篩選面板
+                const toggleBtn = document.getElementById('toggle-filter-btn');
+                const filterPanel = document.getElementById('filter-panel');
+                if (toggleBtn && filterPanel) {
+                    toggleBtn.addEventListener('click', function() {
+                        if (filterPanel.style.display === 'none') {
+                            filterPanel.style.display = 'block';
+                            toggleBtn.textContent = '隱藏篩選';
+                            toggleBtn.style.background = '#007bff';
+                        } else {
+                            filterPanel.style.display = 'none';
+                            toggleBtn.textContent = '顯示篩選';
+                            toggleBtn.style.background = '#28a745';
+                        }
+                    });
+                }
+
+                // 重置（全選）
+                window.resetFilters = function() {
+                    document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+                    document.querySelectorAll('.input-search').forEach(input => input.value = '');
+                    updateFeatures();
+                };
+
+                // 消除所有點選（全取消）
+                window.clearAllFilters = function() {
+                    document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                    document.querySelectorAll('.input-search').forEach(input => input.value = '');
+                    updateFeatures();
+                };
+
+                // 專屬：只消除政權篩選
+                window.clearRegimeFilters = function() {
+                    document.querySelectorAll('.filter-regime').forEach(cb => cb.checked = false);
+                    updateFeatures();
+                };
+
+                // 更新顯示
+                window.updateFeatures = function() {
+                    const source = pointLayer.getSource();
+                    if (!source) return;
+
+                    const checkedRegimes = Array.from(document.querySelectorAll('.filter-regime:checked')).map(cb => cb.value);
+                    const checkedRegions = Array.from(document.querySelectorAll('.filter-region:checked')).map(cb => cb.value);
+                    const countryKeyword = document.getElementById('country-search')?.value.trim().toLowerCase() || '';
+                    const functionKeyword = document.getElementById('function-search')?.value.trim().toLowerCase() || '';
+                    const widthInput = document.getElementById('width-search')?.value.trim() || '';
+                    const dougongKeyword = document.getElementById('dougong-search')?.value.trim().toLowerCase() || '';
+                    const religionKeyword = document.getElementById('religion-search')?.value.trim().toLowerCase() || '';
+                    const eraKeyword = document.getElementById('era-search')?.value.trim().toLowerCase() || '';
+                    const typeKeyword = document.getElementById('type-search')?.value.trim().toLowerCase() || '';
+                    const shapeKeyword = document.getElementById('shape-search')?.value.trim().toLowerCase() || '';
+
+
+                    source.getFeatures().forEach(feature => {
+                        const props = feature.getProperties();
+
+                        const regime = props['政權'] || props['excel_政權'] || '其他';
+                        const region = props['地區'] || props['excel_地區'] || '其他';
+                        const country = props['國家'] || props['excel_國家'] || 'CN';
+                        const func = (props['功能'] || props['excel_功能'] || '').toLowerCase();
+                        const width = parseFloat(props['面寬'] || props['excel_面寬'] || 0);
+                        const dougong = (props['斗拱'] || props['excel_斗拱'] || '').toLowerCase();
+                        const religion = (props['宗教'] || props['excel_宗教'] || '').toLowerCase();
+                        const era = (props['時代'] || props['excel_時代'] || '').toLowerCase();
+                        const type = (props['類型'] || props['excel_類型'] || '').toLowerCase();
+                        const shape = (props['外形'] || props['excel_外形'] || '').toLowerCase();
+
+                        const matchRegime = checkedRegimes.includes(regime);
+                        const matchRegion = checkedRegions.includes(region);
+                        const matchCountry = !countryKeyword || country.toLowerCase().includes(countryKeyword);
+                        const matchFunction = !functionKeyword || func.includes(functionKeyword);
+                        const matchWidth = true; // 保留原有面寬邏輯，或根據需要調整
+                        const matchDougong = !dougongKeyword || dougong.includes(dougongKeyword);
+                        const matchReligion = !religionKeyword || religion.includes(religionKeyword);
+                        const matchEra = !eraKeyword || era.includes(eraKeyword);
+                        const matchType = !typeKeyword || type.includes(typeKeyword);
+                        const matchShape = !shapeKeyword || shape.includes(shapeKeyword);
+
+// 公元輸入搜尋（支援 > < = 範圍）
+const yearOperator = document.getElementById('year-operator').value;
+const yearInput = document.getElementById('year-search').value.trim();
+let matchYear = true;
+
+if (yearInput) {
+    const yearValueRaw = props['公元'] || props['excel_公元'] || props['年份'] || props['excel_年份'] || '';
+    const yearValue = parseFloat(yearValueRaw);  // 轉成數字（支援小數點）
+
+    if (!isNaN(yearValue)) {
+        if (yearOperator === '-') {
+            // 範圍：1100-1200
+            if (yearInput.includes('-')) {
+                const [minStr, maxStr] = yearInput.split('-').map(s => s.trim());
+                const min = parseFloat(minStr);
+                const max = parseFloat(maxStr);
+                matchYear = !isNaN(min) && !isNaN(max) && yearValue >= min && yearValue <= max;
+            } else {
+                matchYear = false;  // 範圍模式但沒輸入 -，視為不匹配
+            }
+        } else if (yearOperator === '>') {
+            const threshold = parseFloat(yearInput);
+            matchYear = !isNaN(threshold) && yearValue > threshold;
+        } else if (yearOperator === '<') {
+            const threshold = parseFloat(yearInput);
+            matchYear = !isNaN(threshold) && yearValue < threshold;
+        } else {  // 等於 (=)
+            const exact = parseFloat(yearInput);
+            matchYear = !isNaN(exact) && Math.abs(yearValue - exact) < 0.0001;  // 容許小數點誤差
+        }
+    } else {
+        // 年份不是有效數字，不匹配
+        matchYear = false;
+    }
+}
+
+                        const show = matchRegime && matchRegion && matchCountry && matchFunction &&
+                                      matchWidth && matchDougong && matchReligion && matchEra &&
+                                      matchType && matchShape && matchYear;
+
+                        feature.setStyle(show ? null : new ol.style.Style({}));
+                    });
+
+                    pointLayer.changed();
+                };
+
+                // 監聽所有 checkbox 和輸入框
+                document.querySelectorAll('input[type="checkbox"], .input-search').forEach(el => {
+                    el.addEventListener(el.type === 'checkbox' ? 'change' : 'input', updateFeatures);
+                });
+
+                // 初始執行
+                updateFeatures();
+            });
+        </script>
+    </body>
+</html>
