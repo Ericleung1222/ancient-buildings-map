@@ -763,3 +763,329 @@ function fnc__specialcol_(values, context) {
 function fnc_project_color(values, context) {
     return false;
 };
+
+
+
+function exp_test4_1rule0_eval_expression(context) {
+    // "公元" = 7.5
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 7.5);
+    } else {
+        return (feature.get('公元')  == 7.5);
+    }
+}
+
+
+function exp_test4_1rule1_eval_expression(context) {
+    // "公元" = 8
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 8);
+    } else {
+        return (feature.get('公元')  == 8);
+    }
+}
+
+
+function exp_test4_1rule2_eval_expression(context) {
+    // "公元" = 8.5
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 8.5);
+    } else {
+        return (feature.get('公元')  == 8.5);
+    }
+}
+
+
+function exp_test4_1rule3_eval_expression(context) {
+    // "公元" = 9
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 9);
+    } else {
+        return (feature.get('公元')  == 9);
+    }
+}
+
+
+function exp_test4_1rule4_eval_expression(context) {
+    // "公元" = 9.5
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 9.5);
+    } else {
+        return (feature.get('公元')  == 9.5);
+    }
+}
+
+
+function exp_test4_1rule5_eval_expression(context) {
+    // "公元" = 10
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 10);
+    } else {
+        return (feature.get('公元')  == 10);
+    }
+}
+
+
+function exp_test4_1rule6_eval_expression(context) {
+    // "公元" = 10.5
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 10.5);
+    } else {
+        return (feature.get('公元')  == 10.5);
+    }
+}
+
+
+function exp_test4_1rule7_eval_expression(context) {
+    // "公元" = 11
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 11);
+    } else {
+        return (feature.get('公元')  == 11);
+    }
+}
+
+
+function exp_test4_1rule8_eval_expression(context) {
+    // "公元" = 11.5
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 11.5);
+    } else {
+        return (feature.get('公元')  == 11.5);
+    }
+}
+
+
+function exp_test4_1rule9_eval_expression(context) {
+    // "公元" = 12
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 12);
+    } else {
+        return (feature.get('公元')  == 12);
+    }
+}
+
+
+function exp_test4_1rule10_eval_expression(context) {
+    // "公元" = 12.5
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 12.5);
+    } else {
+        return (feature.get('公元')  == 12.5);
+    }
+}
+
+
+function exp_test4_1rule11_eval_expression(context) {
+    // "公元" = 13
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 13);
+    } else {
+        return (feature.get('公元')  == 13);
+    }
+}
+
+
+function exp_test4_1rule12_eval_expression(context) {
+    // "公元" = 13.5
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 13.5);
+    } else {
+        return (feature.get('公元')  == 13.5);
+    }
+}
+
+
+function exp_test4_1rule13_eval_expression(context) {
+    // "公元" = 14
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 14);
+    } else {
+        return (feature.get('公元')  == 14);
+    }
+}
+
+
+function exp_test4_1rule14_eval_expression(context) {
+    // "公元" = 14.5
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 14.5);
+    } else {
+        return (feature.get('公元')  == 14.5);
+    }
+}
+
+
+function exp_test4_1rule15_eval_expression(context) {
+    // "公元" = 15
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 15);
+    } else {
+        return (feature.get('公元')  == 15);
+    }
+}
+
+
+function exp_test4_1rule16_eval_expression(context) {
+    // "公元" = 15.5
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 15.5);
+    } else {
+        return (feature.get('公元')  == 15.5);
+    }
+}
+
+
+function exp_test4_1rule17_eval_expression(context) {
+    // "公元" = 16
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 16);
+    } else {
+        return (feature.get('公元')  == 16);
+    }
+}
+
+
+function exp_test4_1rule18_eval_expression(context) {
+    // "公元" = 16.5
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 16.5);
+    } else {
+        return (feature.get('公元')  == 16.5);
+    }
+}
+
+
+function exp_test4_1rule19_eval_expression(context) {
+    // "公元" = 17
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 17);
+    } else {
+        return (feature.get('公元')  == 17);
+    }
+}
+
+
+function exp_test4_1rule20_eval_expression(context) {
+    // "公元" = 17.5
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 17.5);
+    } else {
+        return (feature.get('公元')  == 17.5);
+    }
+}
+
+
+function exp_test4_1rule21_eval_expression(context) {
+    // "公元" = 18
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 18);
+    } else {
+        return (feature.get('公元')  == 18);
+    }
+}
+
+
+function exp_test4_1rule22_eval_expression(context) {
+    // "公元" = 18.5
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 18.5);
+    } else {
+        return (feature.get('公元')  == 18.5);
+    }
+}
+
+
+function exp_test4_1rule23_eval_expression(context) {
+    // "公元" = 19
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 19);
+    } else {
+        return (feature.get('公元')  == 19);
+    }
+}
+
+
+function exp_test4_1rule24_eval_expression(context) {
+    // "公元" = 19.5
+
+    var feature = context.feature;
+    
+    if (feature.properties) {
+        return (feature.get('公元')  == 19.5);
+    } else {
+        return (feature.get('公元')  == 19.5);
+    }
+}

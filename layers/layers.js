@@ -24,8 +24,33 @@ var lyr_test4_1 = new ol.layer.Vector({
                 style: style_test4_1,
                 popuplayertitle: 'test4',
                 interactive: true,
-                title: '<img src="styles/legend/test4_1.png" /> test4'
-            });
+    title: 'test4<br />\
+    <img src="styles/legend/test4_1_0.png" /> 7.5<br />\
+    <img src="styles/legend/test4_1_1.png" /> 8 <br />\
+    <img src="styles/legend/test4_1_2.png" /> 8.5<br />\
+    <img src="styles/legend/test4_1_3.png" /> 9<br />\
+    <img src="styles/legend/test4_1_4.png" /> 9.5<br />\
+    <img src="styles/legend/test4_1_5.png" /> 10<br />\
+    <img src="styles/legend/test4_1_6.png" /> 10.5 <br />\
+    <img src="styles/legend/test4_1_7.png" /> 11<br />\
+    <img src="styles/legend/test4_1_8.png" /> 11.5<br />\
+    <img src="styles/legend/test4_1_9.png" /> 12 <br />\
+    <img src="styles/legend/test4_1_10.png" /> 12.5<br />\
+    <img src="styles/legend/test4_1_11.png" /> 13<br />\
+    <img src="styles/legend/test4_1_12.png" /> 13.5<br />\
+    <img src="styles/legend/test4_1_13.png" /> 14 <br />\
+    <img src="styles/legend/test4_1_14.png" /> 14.5<br />\
+    <img src="styles/legend/test4_1_15.png" /> 15 <br />\
+    <img src="styles/legend/test4_1_16.png" /> 15.5<br />\
+    <img src="styles/legend/test4_1_17.png" /> 16 <br />\
+    <img src="styles/legend/test4_1_18.png" /> 16.5<br />\
+    <img src="styles/legend/test4_1_19.png" /> 17<br />\
+    <img src="styles/legend/test4_1_20.png" /> 17.5 <br />\
+    <img src="styles/legend/test4_1_21.png" /> 18 <br />\
+    <img src="styles/legend/test4_1_22.png" /> 18.5<br />\
+    <img src="styles/legend/test4_1_23.png" /> 19 <br />\
+    <img src="styles/legend/test4_1_24.png" /> 19.5<br />\
+    <img src="styles/legend/test4_1_25.png" /> <br />' });
 
 lyr_google_0.setVisible(true);lyr_test4_1.setVisible(true);
 var layersList = [lyr_google_0,lyr_test4_1];

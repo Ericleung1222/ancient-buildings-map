@@ -42,8 +42,8 @@
             padding: 0;
             margin: 0;
         }
-        #filter-panel {
-            position: absolute; top: 10px; right: 10px; z-index: 1000;
+#filter-panel {
+            position: absolute; top: 70px; left: 10px; z-index: 1000;
             background: white; padding: 15px; border: 1px solid #ccc;
             border-radius: 5px; max-height: 80vh; overflow-y: auto;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2); font-family: Arial, sans-serif;
@@ -68,7 +68,7 @@
         #clear-btn:hover { background: #c82333; }
         /* 隱藏/開啟按鈕樣式 */
         #toggle-filter-btn {
-            position: absolute; top: 10px; right: 10px; z-index: 1100;
+            position: absolute; top: 70px; left: 10px; z-index: 1100;
             padding: 8px 12px; background: #007bff; color: white;
             border: none; border-radius: 4px; cursor: pointer;
             font-size: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
@@ -126,7 +126,7 @@
             <!-- 斗拱輸入搜尋 -->
             <div style="margin-bottom:15px;">
                 <strong>斗拱（輸入搜尋）</strong>
-                <input type="text" id="dougong-search" placeholder="例如：重簷、單檐" class="input-search">
+                <input type="text" id="dougong-search" placeholder="例如：7鋪作、真昂" class="input-search">
             </div>
 
             <!-- 宗教輸入搜尋 -->
@@ -135,9 +135,9 @@
                 <input type="text" id="religion-search" placeholder="例如：佛教、道教" class="input-search">
             </div>
 
-            <!-- 公元輸入搜尋（數字篩選） -->
+            <!-- 世紀輸入搜尋（數字篩選） -->
             <div style="margin-bottom:15px;">
-                <strong>公元（數字篩選）</strong>
+                <strong>世紀（數字篩選）</strong>
                 <div style="display:flex; gap:5px; margin-top:5px;">
                     <select id="year-operator" style="padding:6px; font-size:14px;">
                         <option value="=">等於 (=)</option>
@@ -145,14 +145,14 @@
                         <option value="<">小於 (<)</option>
                         <option value="-">範圍 (-)</option>
                     </select>
-                    <input type="text" id="year-search" placeholder="例如：964 或 1100-1200" class="input-search" style="flex:1;">
+                    <input type="text" id="year-search" placeholder="例如：7 或 7.5" class="input-search" style="flex:1;">
                 </div>
             </div>
 
             <!-- 外形輸入搜尋 -->
             <div style="margin-bottom:15px;">
                 <strong>外形（輸入搜尋）</strong>
-                <input type="text" id="shape-search" placeholder="例如：單檐、重簷、歇山" class="input-search">
+                <input type="text" id="shape-search" placeholder="例如：單檐、歇山、入母屋" class="input-search">
             </div>
 
             <!-- 功能輸入搜尋 -->
@@ -177,7 +177,7 @@
         <script src="styles/test4_1_style.js"></script>
         <script src="./layers/layers.js" type="text/javascript"></script> 
         <script src="./resources/Autolinker.min.js"></script>
-        <script src="./resources/qgis2web.js"></script>  
+        <script src="./resources/qgis2web.js"></script>     
 
         <!-- 篩選邏輯 -->
         <script>
@@ -283,7 +283,7 @@
                         const matchType = !typeKeyword || type.includes(typeKeyword);
                         const matchShape = !shapeKeyword || shape.includes(shapeKeyword);
 
-		// 公元輸入搜尋（支援 > < = 範圍）
+		// 世紀輸入搜尋（支援 > < = 範圍）
 			const yearOperator = document.getElementById('year-operator').value;
 			const yearInput = document.getElementById('year-search').value.trim();
 			let matchYear = true;
