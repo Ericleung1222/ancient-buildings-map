@@ -110,7 +110,13 @@
                 <label><input type="checkbox" class="filter-country" value="TR" checked> TR (土耳其)</label>
            
 		<!-- 新增：國家專屬消除按鈕 -->
-   			<button id="clear-country-btn" onclick="window.clearCountryFilters()" style="margin-top:8px; 				padding:6px 12px; background:#dc3545; color:white; border:none; border-radius:4px; 				cursor:pointer; font-size:13px; width:100%;">
+   			<button id="clear-country-btn" onclick="window.clearCountryFilters()" style="margin-top:8px;
+								padding:6px 12px; background:#dc3545; 
+								color:white; border:none; 
+								border-radius:4px; 
+								cursor:pointer; 
+								font-size:13px; 
+								width:100%;">
         		國家 - 消除所有點選
     	        	</button>
 
@@ -249,13 +255,10 @@
                     const source = pointLayer.getSource();
                     if (!source) return;
 
-                   const checkedCountry = Array.from(document.querySelectorAll('.filter-country:checked')).map(cb => cb.value);
-
+                     const checkedCountry = Array.from(document.querySelectorAll('.filter-country:checked')).map(cb => cb.value);
                     const functionKeyword = document.getElementById('function-search')?.value.trim().toLowerCase() || '';
-                    const widthInput = document.getElementById('width-search')?.value.trim() || '';
                     const dougongKeyword = document.getElementById('dougong-search')?.value.trim().toLowerCase() || '';
                     const religionKeyword = document.getElementById('religion-search')?.value.trim().toLowerCase() || '';
-                    const eraKeyword = document.getElementById('era-search')?.value.trim().toLowerCase() || '';
                     const typeKeyword = document.getElementById('type-search')?.value.trim().toLowerCase() || '';
                     const shapeKeyword = document.getElementById('shape-search')?.value.trim().toLowerCase() || '';
 
@@ -265,21 +268,15 @@
 			
                         const country = props['國家'] || props['excel_國家'] || '其他';
                         const func = (props['功能'] || props['excel_功能'] || '').toLowerCase();
-                        const width = parseFloat(props['面寬'] || props['excel_面寬'] || 0);
                         const dougong = (props['斗拱'] || props['excel_斗拱'] || '').toLowerCase();
                         const religion = (props['宗教'] || props['excel_宗教'] || '').toLowerCase();
-                        const era = (props['時代'] || props['excel_時代'] || '').toLowerCase();
                         const type = (props['類型'] || props['excel_類型'] || '').toLowerCase();
                         const shape = (props['外形'] || props['excel_外形'] || '').toLowerCase();
-
-                        
-                        
+                      
                         const matchCountry = checkedCountry.includes(country);
                         const matchFunction = !functionKeyword || func.includes(functionKeyword);
-                        const matchWidth = true; // 保留原有面寬邏輯，或根據需要調整
                         const matchDougong = !dougongKeyword || dougong.includes(dougongKeyword);
                         const matchReligion = !religionKeyword || religion.includes(religionKeyword);
-                        const matchEra = !eraKeyword || era.includes(eraKeyword);
                         const matchType = !typeKeyword || type.includes(typeKeyword);
                         const matchShape = !shapeKeyword || shape.includes(shapeKeyword);
 
@@ -319,8 +316,7 @@
   		  }
 		}
 
-                        const show =  matchCountry && matchFunction &&
-                                      matchWidth && matchDougong && matchReligion && matchEra &&
+                        const show =  matchCountry && matchFunction && matchDougong && matchReligion &&
                                       matchType && matchShape && matchYear;
 
                         feature.setStyle(show ? null : new ol.style.Style({}));
