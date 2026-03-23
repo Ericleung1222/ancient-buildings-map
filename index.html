@@ -179,11 +179,11 @@
         <script src="./resources/ol.js"></script>
         <script src="./resources/ol-layerswitcher.js"></script>
         <script src="resources/photon-geocoder-autocomplete.min.js"></script>
-        <script src="layers/test4_1.js"></script>
-        <script src="styles/test4_1_style.js"></script>
+        <script src="layers/JPlv1_1.js"></script><script src="layers/CNlv2_2.js"></script><script src="layers/CNlv1_3.js"></script><script src="layers/test42_4.js"></script>
+        <script src="styles/JPlv1_1_style.js"></script><script src="styles/CNlv2_2_style.js"></script><script src="styles/CNlv1_3_style.js"></script><script src="styles/test42_4_style.js"></script>
         <script src="./layers/layers.js" type="text/javascript"></script> 
         <script src="./resources/Autolinker.min.js"></script>
-        <script src="./resources/qgis2web.js"></script>     
+        <script src="./resources/qgis2web.js"></script>    
 
         <!-- 篩選邏輯 -->
         <script>
@@ -199,7 +199,7 @@
                 let pointLayer = null;
                 map.getLayers().getArray().forEach(layer => {
                     const title = layer.get('title') || layer.get('name') || '';
-                    if (title.includes('test4_1') || title.includes('output') || title.includes('古建築')) {
+                    if (title.includes('test42_4') || title.includes('output') || title.includes('古建築')) {
                         pointLayer = layer;
                         console.log('找到點位圖層：', title);
                     }
