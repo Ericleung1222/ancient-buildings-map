@@ -122,25 +122,6 @@
 
  		</div>
 
-    
-            <!-- 類型（輸入搜尋） -->
-            <div style="margin-bottom:15px;">
-                <strong>類型（輸入搜尋）</strong>
-                <input type="text" id="type-search" placeholder="例如：樓閣、塔、殿堂" class="input-search">
-            </div>
-
-            <!-- 斗拱輸入搜尋 -->
-            <div style="margin-bottom:15px;">
-                <strong>斗拱（輸入搜尋）</strong>
-                <input type="text" id="dougong-search" placeholder="例如：7鋪作、真昂" class="input-search">
-            </div>
-
-            <!-- 宗教輸入搜尋 -->
-            <div style="margin-bottom:15px;">
-                <strong>宗教（輸入搜尋）</strong>
-                <input type="text" id="religion-search" placeholder="例如：佛教、道教" class="input-search">
-            </div>
-
             <!-- 世紀輸入搜尋（數字篩選） -->
             <div style="margin-bottom:15px;">
                 <strong>世紀（數字篩選）</strong>
@@ -155,16 +136,64 @@
                 </div>
             </div>
 
-            <!-- 外形輸入搜尋 -->
+            <!-- 時代（輸入搜尋） -->
             <div style="margin-bottom:15px;">
-                <strong>外形（輸入搜尋）</strong>
-                <input type="text" id="shape-search" placeholder="例如：單檐、歇山、入母屋" class="input-search">
+                <strong>時代</strong>
+                <input type="text" id="period-search" placeholder="例如：大明、江戶、高麗" class="input-search">
+            </div>
+
+            <!-- 名稱（輸入搜尋） -->
+            <div style="margin-bottom:15px;">
+                <strong>名稱</strong>
+                <input type="text" id="name-search" placeholder="例如：佛光寺、醍醐寺" class="input-search">
+            </div>
+
+            <!-- 地址（輸入搜尋） -->
+            <div style="margin-bottom:15px;">
+                <strong>地址</strong>
+                <input type="text" id="address-search" placeholder="例如：西安、京都" class="input-search">
+            </div>
+
+            <!-- 類型（輸入搜尋） -->
+            <div style="margin-bottom:15px;">
+                <strong>類型</strong>
+                <input type="text" id="type-search" placeholder="例如：樓閣、塔、殿堂" class="input-search">
             </div>
 
             <!-- 功能輸入搜尋 -->
             <div style="margin-bottom:15px;">
-                <strong>功能（輸入搜尋）</strong>
+                <strong>功能</strong>
                 <input type="text" id="function-search" placeholder="例如：主殿、寺廟" class="input-search">
+            </div>
+
+            <!-- 風格輸入搜尋 -->
+            <div style="margin-bottom:15px;">
+                <strong>風格</strong>
+                <input type="text" id="style-search" placeholder="例如：禪宗樣、和樣" class="input-search">
+            </div>
+
+            <!-- 外形輸入搜尋 -->
+            <div style="margin-bottom:15px;">
+                <strong>外形</strong>
+                <input type="text" id="shape-search" placeholder="例如：單檐、歇山、入母屋" class="input-search">
+            </div>
+
+            <!-- 面寬入搜尋 -->
+            <div style="margin-bottom:15px;">
+                <strong>面寬</strong>
+                <input type="text" id="length-search" placeholder="例如：面三、八角、六椽" class="input-search">
+            </div>
+
+            <!-- 斗拱輸入搜尋 -->
+            <div style="margin-bottom:15px;">
+                <strong>斗拱</strong>
+                <input type="text" id="dougong-search" placeholder="例如：7鋪作、真昂" class="input-search">
+            </div>
+
+            <!-- 宗教輸入搜尋 -->
+            <div style="margin-bottom:15px;">
+                <strong>宗教</strong>
+                <input type="text" id="religion-search" placeholder="例如：佛教、道教" class="input-search">
             </div>
 
             <!-- 按鈕群組 -->
@@ -261,7 +290,11 @@
                     const religionKeyword = document.getElementById('religion-search')?.value.trim().toLowerCase() || '';
                     const typeKeyword = document.getElementById('type-search')?.value.trim().toLowerCase() || '';
                     const shapeKeyword = document.getElementById('shape-search')?.value.trim().toLowerCase() || '';
-
+                    const lengthKeyword = document.getElementById('length-search')?.value.trim().toLowerCase() || '';
+                    const nameKeyword = document.getElementById('name-search')?.value.trim().toLowerCase() || '';
+                    const addressKeyword = document.getElementById('address-search')?.value.trim().toLowerCase() || '';
+                    const styleKeyword = document.getElementById('style-search')?.value.trim().toLowerCase() || '';
+                    const periodKeyword = document.getElementById('period-search')?.value.trim().toLowerCase() || '';
 
                     source.getFeatures().forEach(feature => {
                         const props = feature.getProperties();
@@ -272,13 +305,23 @@
                         const religion = (props['宗教'] || props['excel_宗教'] || '').toLowerCase();
                         const type = (props['類型'] || props['excel_類型'] || '').toLowerCase();
                         const shape = (props['外形'] || props['excel_外形'] || '').toLowerCase();
-                      
+                        const length = (props['面寬'] || props['excel_面寬'] || '').toLowerCase(); 
+                        const name = (props['名稱'] || props['excel_名稱'] || '').toLowerCase(); 
+                        const address = (props['地址'] || props['excel_地址'] || '').toLowerCase(); 
+                        const style = (props['風格'] || props['excel_風格'] || '').toLowerCase(); 
+                        const period = (props['時代'] || props['excel_時代'] || '').toLowerCase(); 
+                 
                         const matchCountry = checkedCountry.includes(country);
                         const matchFunction = !functionKeyword || func.includes(functionKeyword);
                         const matchDougong = !dougongKeyword || dougong.includes(dougongKeyword);
                         const matchReligion = !religionKeyword || religion.includes(religionKeyword);
                         const matchType = !typeKeyword || type.includes(typeKeyword);
                         const matchShape = !shapeKeyword || shape.includes(shapeKeyword);
+                        const matchLength = !lengthKeyword || length.includes(lengthKeyword);
+                        const matchName = !nameKeyword || name.includes(nameKeyword);
+                        const matchAddress = !addressKeyword || address.includes(addressKeyword);
+                        const matchStyle = !styleKeyword || style.includes(styleKeyword);
+                        const matchPeriod = !periodKeyword || period.includes(periodKeyword);
 
 		// 世紀輸入搜尋（支援 > < = 範圍）
 			const yearOperator = document.getElementById('year-operator').value;
@@ -317,7 +360,7 @@
 		}
 
                         const show =  matchCountry && matchFunction && matchDougong && matchReligion &&
-                                      matchType && matchShape && matchYear;
+                                      matchType && matchShape && matchYear && matchLength && matchName && matchAddress && matchStyle && matchPeriod;
 
                         feature.setStyle(show ? null : new ol.style.Style({}));
                     });
