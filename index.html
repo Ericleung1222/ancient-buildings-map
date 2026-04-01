@@ -160,10 +160,27 @@
                 <input type="text" id="type-search" placeholder="例如：樓閣、塔、殿堂" class="input-search">
             </div>
 
-            <!-- 功能輸入搜尋 -->
+            <!-- 功能輸入搜尋（支援兩個條件：包含 / 不包含） -->
             <div style="margin-bottom:15px;">
                 <strong>功能</strong>
-                <input type="text" id="function-search" placeholder="例如：主殿、寺廟" class="input-search">
+                
+                <!-- 第一個功能條件 -->
+                <div style="display:flex; gap:5px; margin-top:8px;">
+                    <select id="function1-operator" style="padding:6px; font-size:14px; width:85px;">
+                        <option value="contains">包含</option>
+                        <option value="not_contains">不包含</option>
+                    </select>
+                    <input type="text" id="function1-search" placeholder="例如：主殿" class="input-search" style="flex:1;">
+                </div>
+
+                <!-- 第二個功能條件 -->
+                <div style="display:flex; gap:5px; margin-top:8px;">
+                    <select id="function2-operator" style="padding:6px; font-size:14px; width:85px;">
+                        <option value="contains">包含</option>
+                        <option value="not_contains">不包含</option>
+                    </select>
+                    <input type="text" id="function2-search" placeholder="例如：寺廟" class="input-search" style="flex:1;">
+                </div>
             </div>
 
             <!-- 風格輸入搜尋 -->
@@ -284,8 +301,15 @@
                     const source = pointLayer.getSource();
                     if (!source) return;
 
-                     const checkedCountry = Array.from(document.querySelectorAll('.filter-country:checked')).map(cb => cb.value);
-                    const functionKeyword = document.getElementById('function-search')?.value.trim().toLowerCase() || '';
+                    const checkedCountry = Array.from(document.querySelectorAll('.filter-country:checked')).map(cb => cb.value);
+
+                    // === 功能雙條件篩選（功能1 + 功能2）===
+                    const func1Op = document.getElementById('function1-operator').value;
+                    const func1Keyword = document.getElementById('function1-search')?.value.trim().toLowerCase() || '';
+                    
+                    const func2Op = document.getElementById('function2-operator').value;
+                    const func2Keyword = document.getElementById('function2-search')?.value.trim().toLowerCase() || '';
+
                     const dougongKeyword = document.getElementById('dougong-search')?.value.trim().toLowerCase() || '';
                     const religionKeyword = document.getElementById('religion-search')?.value.trim().toLowerCase() || '';
                     const typeKeyword = document.getElementById('type-search')?.value.trim().toLowerCase() || '';
@@ -298,21 +322,42 @@
 
                     source.getFeatures().forEach(feature => {
                         const props = feature.getProperties();
-			
+
                         const country = props['國家'] || props['excel_國家'] || '其他';
                         const func = (props['功能'] || props['excel_功能'] || '').toLowerCase();
                         const dougong = (props['斗拱'] || props['excel_斗拱'] || '').toLowerCase();
                         const religion = (props['宗教'] || props['excel_宗教'] || '').toLowerCase();
                         const type = (props['類型'] || props['excel_類型'] || '').toLowerCase();
                         const shape = (props['外形'] || props['excel_外形'] || '').toLowerCase();
-                        const length = (props['面寬'] || props['excel_面寬'] || '').toLowerCase(); 
-                        const name = (props['名稱'] || props['excel_名稱'] || '').toLowerCase(); 
-                        const address = (props['地址'] || props['excel_地址'] || '').toLowerCase(); 
-                        const style = (props['風格'] || props['excel_風格'] || '').toLowerCase(); 
-                        const period = (props['時代'] || props['excel_時代'] || '').toLowerCase(); 
-                 
+                        const length = (props['面寬'] || props['excel_面寬'] || '').toLowerCase();
+                        const name = (props['名稱'] || props['excel_名稱'] || '').toLowerCase();
+                        const address = (props['地址'] || props['excel_地址'] || '').toLowerCase();
+                        const style = (props['風格'] || props['excel_風格'] || '').toLowerCase();
+                        const period = (props['時代'] || props['excel_時代'] || '').toLowerCase();
+
                         const matchCountry = checkedCountry.includes(country);
-                        const matchFunction = !functionKeyword || func.includes(functionKeyword);
+
+                        // === 功能雙條件篩選 ===
+                        let matchFunction = true;
+
+                        // 第一個功能條件
+                        if (func1Keyword) {
+                            if (func1Op === "not_contains") {
+                                matchFunction = matchFunction && !func.includes(func1Keyword);
+                            } else {
+                                matchFunction = matchFunction && func.includes(func1Keyword);
+                            }
+                        }
+
+                        // 第二個功能條件
+                        if (func2Keyword) {
+                            if (func2Op === "not_contains") {
+                                matchFunction = matchFunction && !func.includes(func2Keyword);
+                            } else {
+                                matchFunction = matchFunction && func.includes(func2Keyword);
+                            }
+                        }
+
                         const matchDougong = !dougongKeyword || dougong.includes(dougongKeyword);
                         const matchReligion = !religionKeyword || religion.includes(religionKeyword);
                         const matchType = !typeKeyword || type.includes(typeKeyword);
@@ -323,44 +368,41 @@
                         const matchStyle = !styleKeyword || style.includes(styleKeyword);
                         const matchPeriod = !periodKeyword || period.includes(periodKeyword);
 
-		// 世紀輸入搜尋（支援 > < = 範圍）
-			const yearOperator = document.getElementById('year-operator').value;
-			const yearInput = document.getElementById('year-search').value.trim();
-			let matchYear = true;
+                        // 世紀篩選（保持不變）
+                        const yearOperator = document.getElementById('year-operator').value;
+                        const yearInput = document.getElementById('year-search').value.trim();
+                        let matchYear = true;
+                        if (yearInput) {
+                            const yearValueRaw = props['公元'] || props['excel_公元'] || props['年份'] || props['excel_年份'] || '';
+                            const yearValue = parseFloat(yearValueRaw);
+                            if (!isNaN(yearValue)) {
+                                if (yearOperator === '-') {
+                                    if (yearInput.includes('-')) {
+                                        const [minStr, maxStr] = yearInput.split('-').map(s => s.trim());
+                                        const min = parseFloat(minStr);
+                                        const max = parseFloat(maxStr);
+                                        matchYear = !isNaN(min) && !isNaN(max) && yearValue >= min && yearValue <= max;
+                                    } else {
+                                        matchYear = false;
+                                    }
+                                } else if (yearOperator === '>') {
+                                    const threshold = parseFloat(yearInput);
+                                    matchYear = !isNaN(threshold) && yearValue > threshold;
+                                } else if (yearOperator === '<') {
+                                    const threshold = parseFloat(yearInput);
+                                    matchYear = !isNaN(threshold) && yearValue < threshold;
+                                } else {
+                                    const exact = parseFloat(yearInput);
+                                    matchYear = !isNaN(exact) && Math.abs(yearValue - exact) < 0.0001;
+                                }
+                            } else {
+                                matchYear = false;
+                            }
+                        }
 
-		if (yearInput) {
-    			const yearValueRaw = props['公元'] || props['excel_公元'] || props['年份'] || props['excel_			年份'] || '';
-    			const yearValue = parseFloat(yearValueRaw);  // 轉成數字（支援小數點）
-
-    		if (!isNaN(yearValue)) {
-        		if (yearOperator === '-') {
-            		// 範圍：1100-1200
-            		if (yearInput.includes('-')) {
-               		 const [minStr, maxStr] = yearInput.split('-').map(s => s.trim());
-               		 const min = parseFloat(minStr);
-               		 const max = parseFloat(maxStr);
-               		 matchYear = !isNaN(min) && !isNaN(max) && yearValue >= min && yearValue <= max;
-            		} else {
-               		 matchYear = false;  // 範圍模式但沒輸入 -，視為不匹配
-            		}
-       		 } else if (yearOperator === '>') {
-           		 const threshold = parseFloat(yearInput);
-           		 matchYear = !isNaN(threshold) && yearValue > threshold;
-       		 } else if (yearOperator === '<') {
-           		 const threshold = parseFloat(yearInput);
-           		 matchYear = !isNaN(threshold) && yearValue < threshold;
-       		 } else {  // 等於 (=)
-          		  const exact = parseFloat(yearInput);
-          		  matchYear = !isNaN(exact) && Math.abs(yearValue - exact) < 0.0001;  // 容許小數點誤差
-       		 }
-    		} else {
-       		 // 年份不是有效數字，不匹配
-      		  matchYear = false;
-  		  }
-		}
-
-                        const show =  matchCountry && matchFunction && matchDougong && matchReligion &&
-                                      matchType && matchShape && matchYear && matchLength && matchName && matchAddress && matchStyle && matchPeriod;
+                        const show = matchCountry && matchFunction && matchDougong && matchReligion &&
+                                     matchType && matchShape && matchYear && matchLength &&
+                                     matchName && matchAddress && matchStyle && matchPeriod;
 
                         feature.setStyle(show ? null : new ol.style.Style({}));
                     });
