@@ -160,21 +160,21 @@
                 <input type="text" id="type-search" placeholder="例如：樓閣、塔、殿堂" class="input-search">
             </div>
 
-            <!-- 功能輸入搜尋（支援兩個條件：包含 / 不包含） -->
+            <!-- 功能輸入搜尋（雙條件 + AND/OR） -->
             <div style="margin-bottom:15px;">
                 <strong>功能</strong>
-                
-                <!-- 第一個功能條件 -->
-                <div style="display:flex; gap:5px; margin-top:8px;">
+                <div style="display:flex; gap:5px; margin-top:8px; align-items:center;">
+                    <select id="function-logic" style="padding:6px; font-size:14px; width:60px;">
+                        <option value="AND">AND</option>
+                        <option value="OR">OR</option>
+                    </select>
                     <select id="function1-operator" style="padding:6px; font-size:14px; width:85px;">
                         <option value="contains">包含</option>
                         <option value="not_contains">不包含</option>
                     </select>
                     <input type="text" id="function1-search" placeholder="例如：主殿" class="input-search" style="flex:1;">
                 </div>
-
-                <!-- 第二個功能條件 -->
-                <div style="display:flex; gap:5px; margin-top:8px;">
+                <div style="display:flex; gap:5px; margin-top:8px; align-items:center;">
                     <select id="function2-operator" style="padding:6px; font-size:14px; width:85px;">
                         <option value="contains">包含</option>
                         <option value="not_contains">不包含</option>
@@ -189,10 +189,27 @@
                 <input type="text" id="style-search" placeholder="例如：禪宗樣、和樣" class="input-search">
             </div>
 
-            <!-- 外形輸入搜尋 -->
+	        <!-- 外形輸入搜尋（雙條件 + AND/OR） -->
             <div style="margin-bottom:15px;">
                 <strong>外形</strong>
-                <input type="text" id="shape-search" placeholder="例如：單檐、歇山、入母屋" class="input-search">
+                <div style="display:flex; gap:5px; margin-top:8px; align-items:center;">
+                    <select id="shape-logic" style="padding:6px; font-size:14px; width:60px;">
+                        <option value="AND">AND</option>
+                        <option value="OR">OR</option>
+                    </select>
+                    <select id="shape1-operator" style="padding:6px; font-size:14px; width:85px;">
+                        <option value="contains">包含</option>
+                        <option value="not_contains">不包含</option>
+                    </select>
+                    <input type="text" id="shape1-search" placeholder="例如：單檐" class="input-search" style="flex:1;">
+                </div>
+                <div style="display:flex; gap:5px; margin-top:8px; align-items:center;">
+                    <select id="shape2-operator" style="padding:6px; font-size:14px; width:85px;">
+                        <option value="contains">包含</option>
+                        <option value="not_contains">不包含</option>
+                    </select>
+                    <input type="text" id="shape2-search" placeholder="例如：歇山" class="input-search" style="flex:1;">
+                </div>
             </div>
 
             <!-- 面寬入搜尋 -->
@@ -303,17 +320,23 @@
 
                     const checkedCountry = Array.from(document.querySelectorAll('.filter-country:checked')).map(cb => cb.value);
 
-                    // === 功能雙條件篩選（功能1 + 功能2）===
+                    // === 功能雙條件 + AND/OR ===
+                    const funcLogic = document.getElementById('function-logic').value;
                     const func1Op = document.getElementById('function1-operator').value;
                     const func1Keyword = document.getElementById('function1-search')?.value.trim().toLowerCase() || '';
-                    
                     const func2Op = document.getElementById('function2-operator').value;
                     const func2Keyword = document.getElementById('function2-search')?.value.trim().toLowerCase() || '';
+
+                    // === 外形雙條件 + AND/OR ===
+                    const shapeLogic = document.getElementById('shape-logic').value;
+                    const shape1Op = document.getElementById('shape1-operator').value;
+                    const shape1Keyword = document.getElementById('shape1-search')?.value.trim().toLowerCase() || '';
+                    const shape2Op = document.getElementById('shape2-operator').value;
+                    const shape2Keyword = document.getElementById('shape2-search')?.value.trim().toLowerCase() || '';
 
                     const dougongKeyword = document.getElementById('dougong-search')?.value.trim().toLowerCase() || '';
                     const religionKeyword = document.getElementById('religion-search')?.value.trim().toLowerCase() || '';
                     const typeKeyword = document.getElementById('type-search')?.value.trim().toLowerCase() || '';
-                    const shapeKeyword = document.getElementById('shape-search')?.value.trim().toLowerCase() || '';
                     const lengthKeyword = document.getElementById('length-search')?.value.trim().toLowerCase() || '';
                     const nameKeyword = document.getElementById('name-search')?.value.trim().toLowerCase() || '';
                     const addressKeyword = document.getElementById('address-search')?.value.trim().toLowerCase() || '';
@@ -337,38 +360,38 @@
 
                         const matchCountry = checkedCountry.includes(country);
 
-                        // === 功能雙條件篩選 ===
+                        // === 功能雙條件 + AND/OR ===
                         let matchFunction = true;
-
-                        // 第一個功能條件
-                        if (func1Keyword) {
-                            if (func1Op === "not_contains") {
-                                matchFunction = matchFunction && !func.includes(func1Keyword);
-                            } else {
-                                matchFunction = matchFunction && func.includes(func1Keyword);
-                            }
+                        if (func1Keyword || func2Keyword) {
+                            const match1 = func1Keyword ? 
+                                (func1Op === "not_contains" ? !func.includes(func1Keyword) : func.includes(func1Keyword)) : true;
+                            const match2 = func2Keyword ? 
+                                (func2Op === "not_contains" ? !func.includes(func2Keyword) : func.includes(func2Keyword)) : true;
+                            
+                            matchFunction = (funcLogic === "OR") ? (match1 || match2) : (match1 && match2);
                         }
 
-                        // 第二個功能條件
-                        if (func2Keyword) {
-                            if (func2Op === "not_contains") {
-                                matchFunction = matchFunction && !func.includes(func2Keyword);
-                            } else {
-                                matchFunction = matchFunction && func.includes(func2Keyword);
-                            }
+                        // === 外形雙條件 + AND/OR ===
+                        let matchShape = true;
+                        if (shape1Keyword || shape2Keyword) {
+                            const match1 = shape1Keyword ? 
+                                (shape1Op === "not_contains" ? !shape.includes(shape1Keyword) : shape.includes(shape1Keyword)) : true;
+                            const match2 = shape2Keyword ? 
+                                (shape2Op === "not_contains" ? !shape.includes(shape2Keyword) : shape.includes(shape2Keyword)) : true;
+                            
+                            matchShape = (shapeLogic === "OR") ? (match1 || match2) : (match1 && match2);
                         }
 
                         const matchDougong = !dougongKeyword || dougong.includes(dougongKeyword);
                         const matchReligion = !religionKeyword || religion.includes(religionKeyword);
                         const matchType = !typeKeyword || type.includes(typeKeyword);
-                        const matchShape = !shapeKeyword || shape.includes(shapeKeyword);
                         const matchLength = !lengthKeyword || length.includes(lengthKeyword);
                         const matchName = !nameKeyword || name.includes(nameKeyword);
                         const matchAddress = !addressKeyword || address.includes(addressKeyword);
                         const matchStyle = !styleKeyword || style.includes(styleKeyword);
                         const matchPeriod = !periodKeyword || period.includes(periodKeyword);
 
-                        // 世紀篩選（保持不變）
+                        // 世紀篩選
                         const yearOperator = document.getElementById('year-operator').value;
                         const yearInput = document.getElementById('year-search').value.trim();
                         let matchYear = true;
@@ -421,4 +444,3 @@
         </script>
     </body>
 </html>
-
