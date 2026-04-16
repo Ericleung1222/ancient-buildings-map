@@ -154,10 +154,33 @@
                 <input type="text" id="address-search" placeholder="例如：西安、京都" class="input-search">
             </div>
 
-            <!-- 類型（輸入搜尋） -->
+            <!-- 地區（輸入搜尋） -->
+            <div style="margin-bottom:15px;">
+                <strong>地區</strong>
+                <input type="text" id="region-search" placeholder="例如：東北、關東" class="input-search">
+            </div>
+
+	    <!-- 類型輸入搜尋（雙條件 + AND/OR） -->
             <div style="margin-bottom:15px;">
                 <strong>類型</strong>
-                <input type="text" id="type-search" placeholder="例如：樓閣、塔、殿堂" class="input-search">
+                <div style="display:flex; gap:5px; margin-top:8px; align-items:center;">
+                    <select id="genre-logic" style="padding:6px; font-size:14px; width:60px;">
+                        <option value="AND">AND</option>
+                        <option value="OR">OR</option>
+                    </select>
+                    <select id="genre1-operator" style="padding:6px; font-size:14px; width:85px;">
+                        <option value="contains">包含</option>
+                        <option value="not_contains">不包含</option>
+                    </select>
+                    <input type="text" id="genre1-search" placeholder="例如：孔廟" class="input-search" style="flex:1;">
+                </div>
+                <div style="display:flex; gap:5px; margin-top:8px; align-items:center;">
+                    <select id="genre2-operator" style="padding:6px; font-size:14px; width:85px;">
+                        <option value="contains">包含</option>
+                        <option value="not_contains">不包含</option>
+                    </select>
+                    <input type="text" id="genre2-search" placeholder="例如：主殿" class="input-search" style="flex:1;">
+                </div>
             </div>
 
             <!-- 功能輸入搜尋（雙條件 + AND/OR） -->
@@ -189,7 +212,7 @@
                 <input type="text" id="style-search" placeholder="例如：禪宗樣、和樣" class="input-search">
             </div>
 
-	        <!-- 外形輸入搜尋（雙條件 + AND/OR） -->
+	    <!-- 外形輸入搜尋（雙條件 + AND/OR） -->
             <div style="margin-bottom:15px;">
                 <strong>外形</strong>
                 <div style="display:flex; gap:5px; margin-top:8px; align-items:center;">
@@ -327,6 +350,14 @@
                     const func2Op = document.getElementById('function2-operator').value;
                     const func2Keyword = document.getElementById('function2-search')?.value.trim().toLowerCase() || '';
 
+                    // === 類型雙條件 + AND/OR ===
+                    const genreLogic = document.getElementById('genre-logic').value;
+                    const genre1Op = document.getElementById('genre1-operator').value;
+                    const genre1Keyword = document.getElementById('genre1-search')?.value.trim().toLowerCase() || '';
+                    const genre2Op = document.getElementById('genre2-operator').value;
+                    const genre2Keyword = document.getElementById('genre2-search')?.value.trim().toLowerCase() || '';
+
+
                     // === 外形雙條件 + AND/OR ===
                     const shapeLogic = document.getElementById('shape-logic').value;
                     const shape1Op = document.getElementById('shape1-operator').value;
@@ -336,10 +367,10 @@
 
                     const dougongKeyword = document.getElementById('dougong-search')?.value.trim().toLowerCase() || '';
                     const religionKeyword = document.getElementById('religion-search')?.value.trim().toLowerCase() || '';
-                    const typeKeyword = document.getElementById('type-search')?.value.trim().toLowerCase() || '';
                     const lengthKeyword = document.getElementById('length-search')?.value.trim().toLowerCase() || '';
                     const nameKeyword = document.getElementById('name-search')?.value.trim().toLowerCase() || '';
                     const addressKeyword = document.getElementById('address-search')?.value.trim().toLowerCase() || '';
+                    const regionKeyword = document.getElementById('region-search')?.value.trim().toLowerCase() || '';
                     const styleKeyword = document.getElementById('style-search')?.value.trim().toLowerCase() || '';
                     const periodKeyword = document.getElementById('period-search')?.value.trim().toLowerCase() || '';
 
@@ -350,11 +381,12 @@
                         const func = (props['功能'] || props['excel_功能'] || '').toLowerCase();
                         const dougong = (props['斗拱'] || props['excel_斗拱'] || '').toLowerCase();
                         const religion = (props['宗教'] || props['excel_宗教'] || '').toLowerCase();
-                        const type = (props['類型'] || props['excel_類型'] || '').toLowerCase();
+                        const genre = (props['類型'] || props['excel_類型'] || '').toLowerCase();
                         const shape = (props['外形'] || props['excel_外形'] || '').toLowerCase();
                         const length = (props['面寬'] || props['excel_面寬'] || '').toLowerCase();
                         const name = (props['名稱'] || props['excel_名稱'] || '').toLowerCase();
                         const address = (props['地址'] || props['excel_地址'] || '').toLowerCase();
+                        const region = (props['地區'] || props['excel_地區'] || '').toLowerCase();
                         const style = (props['風格'] || props['excel_風格'] || '').toLowerCase();
                         const period = (props['時代'] || props['excel_時代'] || '').toLowerCase();
 
@@ -371,6 +403,18 @@
                             matchFunction = (funcLogic === "OR") ? (match1 || match2) : (match1 && match2);
                         }
 
+
+                        // === 類型雙條件 + AND/OR ===
+                        let matchGenre = true;
+                        if (genre1Keyword || genre2Keyword) {
+                            const match1 = genre1Keyword ? 
+                                (genre1Op === "not_contains" ? !genre.includes(genre1Keyword) : genre.includes(genre1Keyword)) : true;
+                            const match2 = genre2Keyword ? 
+                                (genre2Op === "not_contains" ? !genre.includes(genre2Keyword) : genre.includes(genre2Keyword)) : true;
+                            
+                            matchGenre = (genreLogic === "OR") ? (match1 || match2) : (match1 && match2);
+                        }
+
                         // === 外形雙條件 + AND/OR ===
                         let matchShape = true;
                         if (shape1Keyword || shape2Keyword) {
@@ -384,10 +428,10 @@
 
                         const matchDougong = !dougongKeyword || dougong.includes(dougongKeyword);
                         const matchReligion = !religionKeyword || religion.includes(religionKeyword);
-                        const matchType = !typeKeyword || type.includes(typeKeyword);
                         const matchLength = !lengthKeyword || length.includes(lengthKeyword);
                         const matchName = !nameKeyword || name.includes(nameKeyword);
                         const matchAddress = !addressKeyword || address.includes(addressKeyword);
+                        const matchRegion = !regionKeyword || region.includes(regionKeyword);
                         const matchStyle = !styleKeyword || style.includes(styleKeyword);
                         const matchPeriod = !periodKeyword || period.includes(periodKeyword);
 
@@ -424,8 +468,8 @@
                         }
 
                         const show = matchCountry && matchFunction && matchDougong && matchReligion &&
-                                     matchType && matchShape && matchYear && matchLength &&
-                                     matchName && matchAddress && matchStyle && matchPeriod;
+                                     matchGenre && matchShape && matchYear && matchLength &&
+                                     matchName && matchAddress && matchRegion && matchStyle && matchPeriod;
 
                         feature.setStyle(show ? null : new ol.style.Style({}));
                     });
