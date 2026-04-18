@@ -124,7 +124,7 @@
 
             <!-- 世紀輸入搜尋（數字篩選） -->
             <div style="margin-bottom:15px;">
-                <strong>世紀（數字篩選）</strong>
+                <strong>世紀</strong>
                 <div style="display:flex; gap:5px; margin-top:5px;">
                     <select id="year-operator" style="padding:6px; font-size:14px;">
                         <option value="=">等於 (=)</option>
@@ -235,16 +235,68 @@
                 </div>
             </div>
 
+
+            <!-- 屋頂類型（輸入搜尋） -->
+            <div style="margin-bottom:15px;">
+                <strong>屋頂類型</strong>
+                <input type="text" id="roof-search" placeholder="例如：歇山、攢尖" class="input-search">
+            </div>
+
+            <!-- 檐輸入搜尋（數字篩選） -->
+            <div style="margin-bottom:15px;">
+                <strong>外檐數</strong>
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                    <select id="eaves-operator" style="padding:6px; font-size:14px;">
+                        <option value="=">等於 (=)</option>
+                        <option value=">">大於 (>)</option>
+                        <option value="<">小於 (<)</option>
+                        <option value="-">範圍 (-)</option>
+                    </select>
+                    <input type="text" id="eaves-search" placeholder="例如：3 或 11" class="input-search" style="flex:1;">
+                </div>
+            </div>
+
+
             <!-- 面寬入搜尋 -->
             <div style="margin-bottom:15px;">
                 <strong>面寬</strong>
                 <input type="text" id="length-search" placeholder="例如：面三、八角、六椽" class="input-search">
             </div>
 
+
+            <!-- 開間輸入搜尋（數字篩選） -->
+            <div style="margin-bottom:15px;">
+                <strong>開間</strong>
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                    <select id="width-operator" style="padding:6px; font-size:14px;">
+                        <option value="=">等於 (=)</option>
+                        <option value=">">大於 (>)</option>
+                        <option value="<">小於 (<)</option>
+                        <option value="-">範圍 (-)</option>
+                    </select>
+                    <input type="text" id="width-search" placeholder="例如：3 或 11" class="input-search" style="flex:1;">
+                </div>
+            </div>
+
             <!-- 斗拱輸入搜尋 -->
             <div style="margin-bottom:15px;">
                 <strong>斗拱</strong>
                 <input type="text" id="dougong-search" placeholder="例如：7鋪作、真昂" class="input-search">
+            </div>
+
+
+            <!-- 斗拱出跳數輸入搜尋（數字篩選） -->
+            <div style="margin-bottom:15px;">
+                <strong>斗拱出跳數</strong>
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                    <select id="jump-operator" style="padding:6px; font-size:14px;">
+                        <option value="=">等於 (=)</option>
+                        <option value=">">大於 (>)</option>
+                        <option value="<">小於 (<)</option>
+                        <option value="-">範圍 (-)</option>
+                    </select>
+                    <input type="text" id="jump-search" placeholder="例如：3 或 11" class="input-search" style="flex:1;">
+                </div>
             </div>
 
             <!-- 宗教輸入搜尋 -->
@@ -373,6 +425,7 @@
                     const regionKeyword = document.getElementById('region-search')?.value.trim().toLowerCase() || '';
                     const styleKeyword = document.getElementById('style-search')?.value.trim().toLowerCase() || '';
                     const periodKeyword = document.getElementById('period-search')?.value.trim().toLowerCase() || '';
+                    const roofKeyword = document.getElementById('roof-search')?.value.trim().toLowerCase() || '';
 
                     source.getFeatures().forEach(feature => {
                         const props = feature.getProperties();
@@ -384,6 +437,7 @@
                         const genre = (props['類型'] || props['excel_類型'] || '').toLowerCase();
                         const shape = (props['外形'] || props['excel_外形'] || '').toLowerCase();
                         const length = (props['面寬'] || props['excel_面寬'] || '').toLowerCase();
+                        const roof = (props['屋頂類型'] || props['excel_屋頂類型'] || '').toLowerCase();
                         const name = (props['名稱'] || props['excel_名稱'] || '').toLowerCase();
                         const address = (props['地址'] || props['excel_地址'] || '').toLowerCase();
                         const region = (props['地區'] || props['excel_地區'] || '').toLowerCase();
@@ -433,6 +487,7 @@
                         const matchAddress = !addressKeyword || address.includes(addressKeyword);
                         const matchRegion = !regionKeyword || region.includes(regionKeyword);
                         const matchStyle = !styleKeyword || style.includes(styleKeyword);
+                        const matchRoof = !roofKeyword || roof.includes(roofKeyword);
                         const matchPeriod = !periodKeyword || period.includes(periodKeyword);
 
                         // 世紀篩選
@@ -467,9 +522,108 @@
                             }
                         }
 
+                        // 開間篩選
+                        const widthOperator = document.getElementById('width-operator').value;
+                        const widthInput = document.getElementById('width-search').value.trim();
+                        let matchWidth = true;
+                        if (widthInput) {
+                            const widthValueRaw = props['開間'] || props['excel_開間'] || '';
+                            const widthValue = parseFloat(widthValueRaw);
+                            if (!isNaN(widthValue)) {
+                                if (widthOperator === '-') {
+                                    if (widthInput.includes('-')) {
+                                        const [minStr, maxStr] = widthInput.split('-').map(s => s.trim());
+                                        const min = parseFloat(minStr);
+                                        const max = parseFloat(maxStr);
+                                        matchWidth = !isNaN(min) && !isNaN(max) && widthValue >= min && widthValue <= max;
+                                    } else {
+                                        matchWidth = false;
+                                    }
+                                } else if (widthOperator === '>') {
+                                    const threshold = parseFloat(widthInput);
+                                    matchWidth = !isNaN(threshold) && widthValue > threshold;
+                                } else if (widthOperator === '<') {
+                                    const threshold = parseFloat(widthInput);
+                                    matchWidth = !isNaN(threshold) && widthValue < threshold;
+                                } else {
+                                    const exact = parseFloat(widthInput);
+                                    matchWidth = !isNaN(exact) && Math.abs(widthValue - exact) < 0.0001;
+                                }
+                            } else {
+                                matchWidth = false;
+                            }
+                        }
+
+                        // 檐篩選
+                        const eavesOperator = document.getElementById('eaves-operator').value;
+                        const eavesInput = document.getElementById('eaves-search').value.trim();
+                        let matchEaves = true;
+                        if (eavesInput) {
+                            const eavesValueRaw = props['檐'] || props['excel_檐'] || '';
+                            const eavesValue = parseFloat(eavesValueRaw);
+                            if (!isNaN(eavesValue)) {
+                                if (eavesOperator === '-') {
+                                    if (eavesInput.includes('-')) {
+                                        const [minStr, maxStr] = eavesInput.split('-').map(s => s.trim());
+                                        const min = parseFloat(minStr);
+                                        const max = parseFloat(maxStr);
+                                        matchEaves = !isNaN(min) && !isNaN(max) && eavesValue >= min && eavesValue <= max;
+                                    } else {
+                                        matchEaves = false;
+                                    }
+                                } else if (eavesOperator === '>') {
+                                    const threshold = parseFloat(eavesInput);
+                                    matchEaves = !isNaN(threshold) && eavesValue > threshold;
+                                } else if (eavesOperator === '<') {
+                                    const threshold = parseFloat(eavesInput);
+                                    matchEaves = !isNaN(threshold) && eavesValue < threshold;
+                                } else {
+                                    const exact = parseFloat(eavesInput);
+                                    matchEaves = !isNaN(exact) && Math.abs(eavesValue - exact) < 0.0001;
+                                }
+                            } else {
+                                matchEaves = false;
+                            }
+                        }
+
+                        // 斗拱出跳數篩選
+                        const jumpOperator = document.getElementById('jump-operator').value;
+                        const jumpInput = document.getElementById('jump-search').value.trim();
+                        let matchJump = true;
+                        if (jumpInput) {
+                            const jumpValueRaw = props['出跳'] || props['excel_出跳'] || '';
+                            const jumpValue = parseFloat(jumpValueRaw);
+                            if (!isNaN(jumpValue)) {
+                                if (jumpOperator === '-') {
+                                    if (jumpInput.includes('-')) {
+                                        const [minStr, maxStr] = jumpInput.split('-').map(s => s.trim());
+                                        const min = parseFloat(minStr);
+                                        const max = parseFloat(maxStr);
+                                        matchJump = !isNaN(min) && !isNaN(max) && jumpValue >= min && jumpValue <= max;
+                                    } else {
+                                        matchJump = false;
+                                    }
+                                } else if (jumpOperator === '>') {
+                                    const threshold = parseFloat(jumpInput);
+                                    matchJump = !isNaN(threshold) && jumpValue > threshold;
+                                } else if (jumpOperator === '<') {
+                                    const threshold = parseFloat(jumpInput);
+                                    matchJump = !isNaN(threshold) && jumpValue < threshold;
+                                } else {
+                                    const exact = parseFloat(jumpInput);
+                                    matchJump = !isNaN(exact) && Math.abs(jumpValue - exact) < 0.0001;
+                                }
+                            } else {
+                                matchJump = false;
+                            }
+                        }
+
+
+
+
                         const show = matchCountry && matchFunction && matchDougong && matchReligion &&
                                      matchGenre && matchShape && matchYear && matchLength &&
-                                     matchName && matchAddress && matchRegion && matchStyle && matchPeriod;
+                                     matchName && matchAddress && matchRegion && matchStyle && matchPeriod && matchWidth && matchEaves  && matchRoof  && matchJump;
 
                         feature.setStyle(show ? null : new ol.style.Style({}));
                     });
