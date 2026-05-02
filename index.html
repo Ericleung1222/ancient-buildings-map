@@ -278,6 +278,34 @@
                 </div>
             </div>
 
+            <!-- 長度輸入搜尋（數字篩選） -->
+            <div style="margin-bottom:15px;">
+                <strong>長度</strong>
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                    <select id="long-operator" style="padding:6px; font-size:14px;">
+                        <option value="=">等於 (=)</option>
+                        <option value=">">大於 (>)</option>
+                        <option value="<">小於 (<)</option>
+                        <option value="-">範圍 (-)</option>
+                    </select>
+                    <input type="text" id="long-search" placeholder="例如：30 或 68" class="input-search" style="flex:1;">
+                </div>
+            </div>
+
+            <!-- 高度輸入搜尋（數字篩選） -->
+            <div style="margin-bottom:15px;">
+                <strong>高度</strong>
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                    <select id="hi-operator" style="padding:6px; font-size:14px;">
+                        <option value="=">等於 (=)</option>
+                        <option value=">">大於 (>)</option>
+                        <option value="<">小於 (<)</option>
+                        <option value="-">範圍 (-)</option>
+                    </select>
+                    <input type="text" id="hi-search" placeholder="例如：10 或 39" class="input-search" style="flex:1;">
+                </div>
+            </div>
+
             <!-- 斗拱輸入搜尋 -->
             <div style="margin-bottom:15px;">
                 <strong>斗拱</strong>
@@ -554,6 +582,71 @@
                             }
                         }
 
+                        // 長度篩選
+                        const longOperator = document.getElementById('long-operator').value;
+                        const longInput = document.getElementById('long-search').value.trim();
+                        let matchLong = true;
+                        if (longInput) {
+                            const longValueRaw = props['長'] || props['excel_長'] || '';
+                            const longValue = parseFloat(longValueRaw);
+                            if (!isNaN(longValue)) {
+                                if (longOperator === '-') {
+                                    if (longInput.includes('-')) {
+                                        const [minStr, maxStr] = longInput.split('-').map(s => s.trim());
+                                        const min = parseFloat(minStr);
+                                        const max = parseFloat(maxStr);
+                                        matchLong = !isNaN(min) && !isNaN(max) && longValue >= min && longValue <= max;
+                                    } else {
+                                        matchLong = false;
+                                    }
+                                } else if (longOperator === '>') {
+                                    const threshold = parseFloat(longInput);
+                                    matchLong = !isNaN(threshold) && longValue > threshold;
+                                } else if (longOperator === '<') {
+                                    const threshold = parseFloat(longInput);
+                                    matchLong = !isNaN(threshold) && longValue < threshold;
+                                } else {
+                                    const exact = parseFloat(longInput);
+                                    matchLong = !isNaN(exact) && Math.abs(longValue - exact) < 0.0001;
+                                }
+                            } else {
+                                matchLong = false;
+                            }
+                        }
+
+                        // 高度篩選
+                        const hiOperator = document.getElementById('hi-operator').value;
+                        const hiInput = document.getElementById('hi-search').value.trim();
+                        let matchHi = true;
+                        if (hiInput) {
+                            const hiValueRaw = props['高'] || props['excel_高'] || '';
+                            const hiValue = parseFloat(hiValueRaw);
+                            if (!isNaN(hiValue)) {
+                                if (hiOperator === '-') {
+                                    if (hiInput.includes('-')) {
+                                        const [minStr, maxStr] = hiInput.split('-').map(s => s.trim());
+                                        const min = parseFloat(minStr);
+                                        const max = parseFloat(maxStr);
+                                        matchHi = !isNaN(min) && !isNaN(max) && hiValue >= min && hiValue <= max;
+                                    } else {
+                                        matchHi = false;
+                                    }
+                                } else if (hiOperator === '>') {
+                                    const threshold = parseFloat(hiInput);
+                                    matchHi = !isNaN(threshold) && hiValue > threshold;
+                                } else if (hiOperator === '<') {
+                                    const threshold = parseFloat(hiInput);
+                                    matchHi = !isNaN(threshold) && hiValue < threshold;
+                                } else {
+                                    const exact = parseFloat(hiInput);
+                                    matchHi = !isNaN(exact) && Math.abs(hiValue - exact) < 0.0001;
+                                }
+                            } else {
+                                matchHi = false;
+                            }
+                        }
+
+
                         // 檐篩選
                         const eavesOperator = document.getElementById('eaves-operator').value;
                         const eavesInput = document.getElementById('eaves-search').value.trim();
@@ -623,7 +716,7 @@
 
                         const show = matchCountry && matchFunction && matchDougong && matchReligion &&
                                      matchGenre && matchShape && matchYear && matchLength &&
-                                     matchName && matchAddress && matchRegion && matchStyle && matchPeriod && matchWidth && matchEaves  && matchRoof  && matchJump;
+                                     matchName && matchAddress && matchRegion && matchStyle && matchPeriod && matchWidth && matchLong && matchHi && matchEaves  && matchRoof  && matchJump;
 
                         feature.setStyle(show ? null : new ol.style.Style({}));
                     });
@@ -642,3 +735,4 @@
         </script>
     </body>
 </html>
+
