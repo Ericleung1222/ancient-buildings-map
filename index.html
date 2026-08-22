@@ -346,11 +346,11 @@
         <script src="./resources/ol.js"></script>
         <script src="./resources/ol-layerswitcher.js"></script>
         <script src="resources/photon-geocoder-autocomplete.min.js"></script>
-        <script src="layers/JPLv1_1.js"></script><script src="layers/CNLv2_2.js"></script><script src="layers/CNLv1_3.js"></script><script src="layers/test43_4.js"></script>
-        <script src="styles/JPLv1_1_style.js"></script><script src="styles/CNLv2_2_style.js"></script><script src="styles/CNLv1_3_style.js"></script><script src="styles/test43_4_style.js"></script>
+        <script src="layers/JPLv1_2.js"></script><script src="layers/CNLv2_3.js"></script><script src="layers/CNLv1_4.js"></script><script src="layers/test43_5.js"></script>
+        <script src="styles/JPLv1_2_style.js"></script><script src="styles/CNLv2_3_style.js"></script><script src="styles/CNLv1_4_style.js"></script><script src="styles/test43_5_style.js"></script>
         <script src="./layers/layers.js" type="text/javascript"></script> 
         <script src="./resources/Autolinker.min.js"></script>
-        <script src="./resources/qgis2web.js"></script>        
+        <script src="./resources/qgis2web.js"></script>           
 
         <!-- 篩選邏輯 -->
         <script>
@@ -362,20 +362,68 @@
                     console.log(`索引 ${index}: title="${title}"`);
                 });
 
-                // 找點位圖層
+                // 找點位圖層：不依賴固定的 test43_4 / test43_5 名稱
                 let pointLayer = null;
-                map.getLayers().getArray().forEach(layer => {
-                    const title = layer.get('title') || layer.get('name') || '';
-                    if (title.includes('test43_4') || title.includes('output') || title.includes('古建築')) {
-                        pointLayer = layer;
-                        console.log('找到點位圖層：', title);
-                    }
-                });
 
-                if (!pointLayer) {
-                    console.error('找不到點位圖層！');
-                    return;
+                function getAllLayers(collection, result = []) {
+                    collection.getArray().forEach(layer => {
+                        if (layer.getLayers && layer.getLayers().getArray) {
+                            getAllLayers(layer.getLayers(), result);
+                        } else {
+                            result.push(layer);
+                        }
+                    });
+                    return result;
                 }
+
+                const allLayers = getAllLayers(map.getLayers());
+
+                // 優先用資料欄位 + Point 幾何判斷真正的古建築點位圖層
+                for (const layer of allLayers) {
+                    const source = layer.getSource ? layer.getSource() : null;
+                    if (!source || !source.getFeatures) continue;
+
+                    const features = source.getFeatures();
+                    const sample = features.slice(0, Math.min(features.length, 20));
+
+                    if (sample.some(feature => {
+                        const props = feature.getProperties ? feature.getProperties() : {};
+                        const geometry = feature.getGeometry ? feature.getGeometry() : null;
+                        const type = geometry && geometry.getType ? geometry.getType() : '';
+
+                        return (
+                            (type === 'Point' || type === 'MultiPoint') &&
+                            (
+                                Object.prototype.hasOwnProperty.call(props, '國家') ||
+                                Object.prototype.hasOwnProperty.call(props, 'excel_國家') ||
+                                Object.prototype.hasOwnProperty.call(props, '名稱') ||
+                                Object.prototype.hasOwnProperty.call(props, 'excel_名稱')
+                            )
+                        );
+                    })) {
+                        pointLayer = layer;
+                        break;
+                    }
+                }
+
+                // 後備：用圖層名稱判斷
+                if (!pointLayer) {
+                    pointLayer = allLayers.find(layer => {
+                        const title = String(
+                            layer.get('title') || layer.get('name') || ''
+                        ).toLowerCase();
+
+                        return title.includes('test43') ||
+                               title.includes('output') ||
+                               title.includes('古建築');
+                    }) || null;
+                }
+
+                console.log(
+                    pointLayer
+                        ? '找到點位圖層：' + (pointLayer.get('title') || pointLayer.get('name') || '無名稱')
+                        : '找不到點位圖層！'
+                );
 
                 // 隱藏/開啟篩選面板
                 const toggleBtn = document.getElementById('toggle-filter-btn');
@@ -419,6 +467,11 @@
 
                 // 更新顯示
                 window.updateFeatures = function() {
+                    if (!pointLayer) {
+                        console.warn('updateFeatures：找不到點位圖層');
+                        return;
+                    }
+
                     const source = pointLayer.getSource();
                     if (!source) return;
 
