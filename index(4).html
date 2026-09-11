@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>East Asian Timber Architecture — V1.5</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--bg:#f5f7fb;--surface:#fff;--surface2:#f1f4f8;--text:#101828;--muted:#667085;--line:#e2e6ed;--accent:#2563eb;--shadow:0 10px 30px rgba(16,24,40,.09);--radius:12px}
+:root[data-theme=dark]{--bg:#0b0f14;--surface:#111820;--surface2:#18212b;--text:#f2f5f8;--muted:#99a6b5;--line:#29333e;--accent:#78a9ff;--shadow:0 14px 36px rgba(0,0,0,.35)}
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:13px/1.45 Inter,system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif}
+button,input{font:inherit}button{cursor:pointer}.top{height:64px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 20px;gap:28px;position:relative;z-index:30}
+.brand{font-weight:750;letter-spacing:.08em;font-size:13px;white-space:nowrap}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.16em;margin-top:3px}
+.nav{display:flex;gap:3px}.nav button{border:0;background:transparent;color:var(--muted);padding:9px 11px;border-radius:8px}.nav button.active,.nav button:hover{background:var(--surface2);color:var(--text)}
+.topright{margin-left:auto;display:flex;align-items:center;gap:9px;color:var(--muted);font-size:11px}.theme{border:1px solid var(--line);background:var(--surface2);color:var(--text);border-radius:18px;padding:7px 11px}
+.loading-state{position:absolute;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(8px);font-size:12px;color:var(--muted);pointer-events:none}.loading-state.hidden{display:none}.layout{height:calc(100% - 64px);display:grid;grid-template-columns:var(--filter,310px) var(--results,450px) 1fr;min-width:900px}.layout.results-hidden{grid-template-columns:var(--filter,310px) 0 minmax(0,1fr)}.layout.results-hidden .results-panel{visibility:hidden;overflow:hidden;pointer-events:none;background:transparent;border:0}.layout.results-hidden #resize2{display:none}.panel{min-width:0;background:var(--surface);border-right:1px solid var(--line);overflow:auto}
+.panelhead{height:54px;padding:0 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(12px);z-index:5}
+.panel-toggle{border:1px solid var(--line);background:var(--surface2);color:var(--muted);border-radius:7px;padding:5px 8px;font-size:10px}.panel-toggle:hover{color:var(--text)}
+.kicker{font-size:10px;letter-spacing:.15em;color:var(--muted);font-weight:750}.count{color:var(--muted);font-variant-numeric:tabular-nums}.section{padding:15px 16px;border-bottom:1px solid var(--line)}.section h3{font-size:10px;color:var(--muted);letter-spacing:.13em;margin:0 0 10px}
+input{background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 9px;outline:0}input:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 14%,transparent)}
+.search{position:relative}.search:before{content:"⌕";position:absolute;left:10px;top:7px;color:var(--muted);font-size:15px}.search input{width:100%;padding-left:29px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{border:1px solid var(--line);background:var(--surface2);color:var(--text);border-radius:18px;padding:5px 9px;font-size:11px}.chip.selected{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 13%,var(--surface));color:var(--accent)}
+details{border:1px solid var(--line);border-radius:9px;margin-top:8px;overflow:hidden}summary{padding:8px 10px;background:var(--surface2);cursor:pointer;font-weight:650;font-size:11px}.inside{padding:9px}
+.countline{font-size:10px;color:var(--muted);margin-bottom:7px}.mode-ui{display:inline-flex;gap:3px;margin-left:7px;vertical-align:middle}.mode-ui button{border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:6px;padding:2px 6px;font-size:9px}.mode-ui button.active{background:var(--accent);border-color:var(--accent);color:#fff}.section-title{display:flex;align-items:center;justify-content:space-between}.section-title h3{margin:0}.emptyopt{color:var(--muted);font-size:11px;padding:5px}
+.card{border-bottom:1px solid var(--line);padding:15px 16px;scroll-margin-top:54px;transition:.15s}.result-pager{padding:10px 12px;border-top:1px solid var(--line);display:flex;justify-content:center;align-items:center;gap:7px;background:var(--surface);position:sticky;bottom:0;z-index:4}.result-pager button{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:7px;padding:5px 9px;font-size:10px}.result-pager button:disabled{opacity:.45;cursor:default}.result-pager span{font-size:10px;color:var(--muted);min-width:80px;text-align:center}.card:hover,.card.open{background:color-mix(in srgb,var(--surface2) 70%,var(--surface))}
+.cardhead{display:flex;gap:9px}.marker-dot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex:none;border:1px solid rgba(0,0,0,.25)}.title{font-size:14px;font-weight:700}.meta{color:var(--muted);font-size:11px;margin-top:3px}.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.tag{font-size:10px;padding:3px 6px;background:var(--surface2);border:1px solid var(--line);border-radius:5px;color:var(--muted)}
+.expand{display:none;border-top:1px dashed var(--line);margin-top:13px;padding-top:12px}.card.open .expand{display:block}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.field{background:var(--surface2);padding:8px 9px;border-radius:7px}.field b{display:block;color:var(--muted);font-size:9px;letter-spacing:.07em;margin-bottom:3px}.field span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.field.wide{grid-column:1/-1}.field.wide span{white-space:normal;overflow:visible}
+.result-section{margin-top:13px}.result-section:first-child{margin-top:0}.result-section-title{font-size:9px;letter-spacing:.13em;color:var(--muted);font-weight:800;margin:0 0 7px}.result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.result-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.result-grid.five{grid-template-columns:repeat(5,minmax(0,1fr))}.result-value{background:var(--surface2);padding:8px 9px;border-radius:7px;min-width:0}.result-value b{display:block;color:var(--muted);font-size:9px;letter-spacing:.05em;margin-bottom:3px}.result-value span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.result-value.wide{grid-column:1/-1}.result-value.wide span{white-space:normal;overflow:visible;overflow-wrap:anywhere}.result-location .result-value{background:transparent;border:1px solid var(--line)}.result-header-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}.result-header-tags .tag{background:var(--surface2)}.result-empty{color:var(--muted);font-size:11px;padding:3px 0}
+
+.actionrow{display:flex;gap:7px;margin-top:10px}.action{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:7px;padding:6px 9px;font-size:11px}.action.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.mapwrap{position:relative;min-width:0}.map{height:100%;width:100%}.maptools{position:absolute;z-index:1000;top:12px;left:12px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:10px;padding:5px;display:flex;gap:4px}.maptools button{border:0;background:transparent;color:var(--muted);border-radius:7px;padding:7px 9px;font-size:10px}.maptools button.active{background:var(--surface2);color:var(--text)}.maptools .show-results{display:none}.results-hidden .maptools .show-results{display:block}.layout.filters-hidden{grid-template-columns:0 var(--results,450px) minmax(0,1fr)}.filters-hidden-state #resize1{display:none}.layout.filters-hidden .filters-panel{visibility:hidden;overflow:hidden;pointer-events:none;background:transparent;border:0}.layout.filters-hidden #resize1{display:none}.layout.filters-hidden .filters-panel{border-right:0}.layout.results-hidden .results-panel{border-right:0}.layout.filters-hidden.results-hidden{grid-template-columns:0 0 minmax(0,1fr)}.maptools .show-filters{display:none}.filters-hidden .maptools .show-filters{display:block}.gis-marker{width:10px;height:10px;border-radius:50%;border:1px solid rgba(255,255,255,.95);box-shadow:0 0 0 1px rgba(0,0,0,.35);}
+.legend{position:absolute;z-index:1000;right:12px;bottom:12px;width:175px;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(10px);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:10px;padding:10px}.legend h4{margin:0 0 8px;font-size:10px;letter-spacing:.1em}.gradient{height:10px;border-radius:5px;background:linear-gradient(90deg,#aaacb1 0%,#5d4037 8%,#8d6e63 12%,#c65a18 20%,#d32f2f 28%,#ef5350 32%,#7b1fa2 40%,#ab47bc 44%,#30409f 48%,#5c6bc0 52%,#1976d2 56%,#42a5f5 60%,#00796b 64%,#26a69a 68%,#388e3c 72%,#66bb6a 76%,#fbc02d 80%,#fff176 84%,#f57c00 88%,#ffb13b 91%,#fc3d9c 95%,#ffa7d3 97%,#f082d6 98.5%,#ffddf7 100%)}.legendscale{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:4px}.legend-bins{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px 9px;margin-top:7px;max-height:260px;overflow:auto}.legend-bin{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--muted)}.legend-bin i{width:9px;height:9px;border-radius:50%;border:1px solid rgba(0,0,0,.25);flex:none}
+/* Dedicated Leaflet panes make the earliest building at a shared coordinate physically above later buildings. */
+.map-popup{width:max-content;min-width:0;max-width:360px;text-align:center}.map-popup b{display:block;font-size:13px;line-height:1.35;white-space:normal;text-align:center;overflow-wrap:anywhere}.map-popup .small{font-size:10px;color:#667085;margin-top:3px}
+.tableview{display:none;height:calc(100% - 64px);background:var(--surface);overflow:hidden}.tabletoolbar{height:56px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px;padding:0 16px}.tablewrap{height:calc(100% - 104px);overflow:auto}.table{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:11px}.table th,.table td{height:31px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:7px 9px;white-space:nowrap;background:var(--surface);text-align:left}.table th{position:sticky;top:0;z-index:4;color:var(--muted);font-size:10px}.throw{display:flex;align-items:center;gap:6px}.filterbtn{border:0;background:var(--surface2);color:var(--muted);border-radius:5px;padding:3px 5px}.table tbody tr:hover td{background:var(--surface2)}.table tbody .virtual-spacer td{background:transparent!important}.table tbody .virtual-spacer{pointer-events:none}
+.pager{display:none;height:48px;border-top:1px solid var(--line);display:flex;justify-content:center;align-items:center;gap:9px}.pager button{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:7px;padding:5px 9px}
+.filter-pop{position:fixed;z-index:3000;width:280px;max-height:420px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:10px;padding:10px}.filter-pop .pophead{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:11px}.filter-pop input{width:100%;margin:8px 0}.opts{max-height:270px;overflow:auto;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:5px 0}.opt{display:flex;gap:7px;align-items:center;padding:5px 4px;font-size:11px}.opt:hover{background:var(--surface2)}.opt input{width:auto;margin:0}.popactions{display:flex;gap:6px;margin-top:8px}.popactions button{border:1px solid var(--line);background:var(--surface2);color:var(--text);border-radius:7px;padding:6px 8px;font-size:10px}.popactions .apply{background:var(--accent);color:#fff;border-color:var(--accent)}
+.resize{position:fixed;top:64px;bottom:0;width:7px;cursor:col-resize;z-index:16}.resize.left{left:calc(var(--filter,310px) - 3px)}.resize.mid{left:calc(var(--filter,310px) + var(--results,450px) - 3px)}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--surface);color:var(--text)}.leaflet-control-zoom a{background:var(--surface)!important;color:var(--text)!important;border-color:var(--line)!important}.leaflet-control-attribution{background:color-mix(in srgb,var(--surface) 80%,transparent)!important;color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="top">
+<div class="brand">EAST ASIAN TIMBER ARCHITECTURE<small>GIS + DATABASE EXPLORER · V1.6</small></div>
+<nav class="nav"><button id="navExplorer" class="active">EXPLORER</button><button id="navData">DATABASE</button></nav>
+<div class="topright"><span id="recordCount"></span><button id="themeBtn" class="theme">☾ Dark</button></div>
+</header>
+
+<main id="explorer" class="layout"><div id="loadingState" class="loading-state">載入研究資料中…</div>
+<aside class="panel filters-panel">
+<div class="panelhead"><span class="kicker">Filters</span><span style="display:flex;gap:7px;align-items:center"><button id="toggleFilters" class="panel-toggle">Hide</button><button id="clear" class="chip">Reset</button></span></div>
+<div class="section"><h3>SEARCH</h3><div class="search"><input id="q" placeholder="Search name, ID, address, notes..."></div></div>
+
+<div class="section"><h3>LOCATION</h3>
+<details open><summary>Main Regions <span class="summary-mode" data-mode-slot="plate"></span></summary><div class="inside"><div class="countline" id="plateAvail"></div><div class="chips" id="plateChips"></div></div></details>
+<details open><summary>Country <span class="summary-mode" data-mode-slot="country"></span></summary><div class="inside"><div class="countline" id="countryAvail"></div><div class="chips" id="countryChips"></div></div></details>
+<details><summary>Region <span class="summary-mode" data-mode-slot="region"></span></summary><div class="inside"><div class="countline" id="regionAvail"></div><div class="chips" id="regionChips"></div></div></details>
+</div>
+
+<div class="section"><h3>DATE</h3>
+<div class="row"><input id="centuryMin" type="number" step=".5" placeholder="Century from"><input id="centuryMax" type="number" step=".5" placeholder="Century to"></div>
+<div style="height:7px"></div><div class="row"><input id="yearMin" type="number" placeholder="Year from"><input id="yearMax" type="number" placeholder="Year to"></div>
+<details><summary>Regime · multi-select <span class="summary-mode" data-mode-slot="regime"></span></summary><div class="inside"><div class="countline" id="regimeAvail"></div><div class="chips" id="regimeChips"></div></div></details>
+<div style="height:8px"></div><input id="eraInput" style="width:100%" placeholder="Era / period — text search">
+</div>
+
+<div class="section"><h3>SITE & FUNCTION</h3>
+<details open><summary>Function · Main · multi-select <span class="summary-mode" data-mode-slot="function_main"></span></summary><div class="inside" id="functionMainChips"></div></details>
+<details><summary>Site Function · multi-select <span class="summary-mode" data-mode-slot="site_function"></span></summary><div class="inside" id="siteChips"></div></details>
+<details><summary>Building Role · multi-select <span class="summary-mode" data-mode-slot="building_role"></span></summary><div class="inside" id="roleChips"></div></details>
+<div style="height:8px"></div><input id="religionInput" style="width:100%" placeholder="Religion — text search">
+</div>
+
+<div class="section"><h3>ARCHITECTURAL TYPE</h3>
+<details open><summary>Type · Main · multi-select <span class="summary-mode" data-mode-slot="type_main"></span></summary><div class="inside" id="typeMainChips"></div></details>
+<details><summary>Type · Sub · multi-select <span class="summary-mode" data-mode-slot="type_sub"></span></summary><div class="inside" id="typeSubChips"></div></details>
+<details><summary>Roof Type · multi-select <span class="summary-mode" data-mode-slot="roof_type"></span></summary><div class="inside" id="roofChips"></div></details>
+</div>
+
+<div class="section"><h3>ROOF / STRUCTURE</h3>
+<details open><summary>Material · multi-select <span class="summary-mode" data-mode-slot="material"></span></summary><div class="inside" id="materialChips"></div></details>
+<details><summary>Structure · multi-select <span class="summary-mode" data-mode-slot="structure"></span></summary><div class="inside" id="structureChips"></div></details>
+</div>
+
+<div class="section"><h3>DIMENSIONS</h3>
+<div class="row"><input id="eavesMin" type="number" step="1" placeholder="出檐數 ≥"><input id="eavesMax" type="number" step="1" placeholder="出檐數 ≤"></div>
+<div style="height:7px"></div><div class="row"><input id="baysMin" type="number" step="1" placeholder="開間數 ≥"><input id="baysMax" type="number" step="1" placeholder="開間數 ≤"></div>
+<div style="height:7px"></div><div class="row"><input id="floorsMin" type="number" step="1" placeholder="樓層數 ≥"><input id="floorsMax" type="number" step="1" placeholder="樓層數 ≤"></div>
+<div style="height:7px"></div><div class="row"><input id="jumpMin" type="number" step="1" placeholder="出跳 ≥"><input id="jumpMax" type="number" step="1" placeholder="出跳 ≤"></div>
+<div style="height:7px"></div><div class="row"><input id="lengthMin" type="number" step="0.01" placeholder="長 ≥"><input id="lengthMax" type="number" step="0.01" placeholder="長 ≤"></div>
+<div style="height:7px"></div><div class="row"><input id="heightMin" type="number" step="0.01" placeholder="高 ≥"><input id="heightMax" type="number" step="0.01" placeholder="高 ≤"></div>
+</div>
+<div class="section"><div class="section-title"><h3>規模</h3><span data-mode-slot="scale"></span></div><div class="chips" id="scaleChips"></div></div>
+</aside>
+
+<section class="panel results-panel">
+<div class="panelhead"><span class="kicker">Results</span><span style="display:flex;align-items:center;gap:8px"><span id="resultCount" class="count"></span><button id="toggleResults" class="panel-toggle">Hide</button></span></div><div id="results"></div><div id="resultPager" class="result-pager"></div>
+</section>
+
+<section class="mapwrap"><div id="map" class="map"></div>
+<div class="maptools"><button id="osmBtn" class="active">OpenStreetMap</button><button id="googleBtn">Google Satellite</button><button id="showResults" class="show-results">Show Results</button><button id="showFilters" class="show-filters">Show Filters</button></div>
+<div class="legend"><h4>CENTURY · 0.5-CENTURY BINS</h4><div class="gradient"></div><div id="legendBins" class="legend-bins"></div><div style="font-size:9px;color:var(--muted);margin-top:6px">Each color represents one half-century from 7th century onward; buildings without half-century data are shown in black.</div></div>
+</section>
+</main>
+
+<main id="tableview" class="tableview">
+<div class="tabletoolbar"><span class="kicker">DATABASE</span><span id="tableCount" class="count"></span><input id="tableSearch" placeholder="Search all columns..." style="width:260px;margin-left:auto"><button id="tableClear" class="chip">Clear filters</button></div>
+<div class="tablewrap" id="tableWrap"><table class="table" id="table"></table></div><div class="pager"><button id="prevPage">←</button><span id="pageInfo"></span><button id="nextPage">→</button></div>
+</main>
+
+<div id="filterPop" class="filter-pop" style="display:none"></div>
+<div id="resize1" class="resize left"></div><div id="resize2" class="resize mid"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+const APP_VERSION="V1.6";
+let DATA=[],EXPLORER=[],filtered=[],gisMap=null,osmLayer=null,googleLayer=null,markerLayer=null,markers=[],markerCache=new Map(),openedId=null,activeMap="osm",resultPage=1,resultPageSize=80;
+const F={plate:new Set(),country:new Set(),region:new Set(),regime:new Set(),function_main:new Set(),site_function:new Set(),building_role:new Set(),type_main:new Set(),type_sub:new Set(),roof_type:new Set(),material:new Set(),structure:new Set(),scale:new Set()};
+const FM=Object.fromEntries(Object.keys(F).map(k=>[k,"include"]));
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const filterVal=(d,key)=>d[key];
+function numericValue(d,key,rawKey){
+ const v=d?.[key] ?? d?.raw?.[rawKey];
+ if(v===null||v===undefined||String(v).trim()==="")return null;
+ if(typeof v==='number')return Number.isFinite(v)?v:null;
+ const m=String(v).trim().replace(/,/g,"").match(/[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?/);
+ if(!m)return null;
+ const n=Number(m[0]);
+ return Number.isFinite(n)?n:null;
+}
+const vals=(key,base)=>[...new Set(base.map(d=>filterVal(d,key)).filter(v=>v!==null&&v!==undefined&&String(v)!==""&&String(v)!=="None"))].sort((a,b)=>String(a).localeCompare(String(b),"zh-Hant",{numeric:true}));
+function modeUI(key){return `<span class="mode-ui" data-mode="${key}"><button data-m="include" class="${FM[key]==="include"?"active":""}">包含</button><button data-m="exclude" class="${FM[key]==="exclude"?"active":""}">不包含</button></span>`}
+function bindModeUI(){document.querySelectorAll(".mode-ui").forEach(w=>{const key=w.dataset.mode;w.querySelectorAll("button").forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();FM[key]=b.dataset.m;apply()})})}
+
+const CENTURY_COLORS={7.0:"#7f858a",7.5:"#aaacb1",8.0:"#5d4037",8.5:"#8d6e63",9.0:"#7e350e",9.5:"#be5014",10.0:"#d32f2f",10.5:"#ef5350",11.0:"#7b1fa2",11.5:"#ab47bc",12.0:"#303f9f",12.5:"#5c6bc0",13.0:"#1976d2",13.5:"#42a5f5",14.0:"#00796b",14.5:"#26a69a",15.0:"#388e3c",15.5:"#66bb6a",16.0:"#fbc02d",16.5:"#fff176",17.0:"#f57c00",17.5:"#ffa726",18.0:"#fc3d9c",18.5:"#ffa7d3",19.0:"#f082d6",19.5:"#ffddf7"};
+function colorForCentury(c){if(typeof c!=="number"||!isFinite(c))return "#000000";if(c>=7){let k=Math.round(c*2)/2;if(k<7)k=7;if(k>19.5)k=19.5;return CENTURY_COLORS[k]||"#ffddf7"}if(c>=6)return "#7a8086";if(c>=3)return "#7a5a48";return "#6f6660"}
+
+function locationBase(key){
+ if(key==="plate")return EXPLORER;
+ if(key==="country")return EXPLORER.filter(d=>!F.plate.size||F.plate.has(String(d.plate)));
+ if(key==="region")return EXPLORER.filter(d=>(!F.plate.size||F.plate.has(String(d.plate)))&&(!F.country.size||F.country.has(String(d.country))));
+ if(key==="regime")return EXPLORER.filter(d=>(!F.plate.size||F.plate.has(String(d.plate)))&&(!F.country.size||F.country.has(String(d.country)))&&(!F.region.size||F.region.has(String(d.region))));
+ return EXPLORER;
+}
+function textAndRangeMatch(d){
+ const q=$("q").value.trim().toLowerCase();
+ if(q&&!(d._searchText||"").includes(q))return false;
+ const religion=$("religionInput").value.trim().toLowerCase();
+ if(religion&&!(String(d.religion??"").toLowerCase().includes(religion)))return false;
+ const ranges=[["centuryMin","centuryMax","century","世紀(半)"],["yearMin","yearMax","year","公元"],["eavesMin","eavesMax","eaves","出檐數"],["baysMin","baysMax","bays","開間數"],["floorsMin","floorsMax","floors","樓層數"],["jumpMin","jumpMax","jumps","出跳"],["lengthMin","lengthMax","length","長"],["heightMin","heightMax","height","高"]];
+ for(const [a,b,k,rk] of ranges){const lo=$(a).value===""?-Infinity:Number($(a).value),hi=$(b).value===""?Infinity:Number($(b).value);if((lo>-Infinity||hi<Infinity)){const n=numericValue(d,k,rk);if(n===null||n<lo||n>hi)return false}}
+ const era=$("eraInput").value.trim().toLowerCase();if(era&&!`${d.era??""} ${d.raw?.時代??""}`.toLowerCase().includes(era))return false;
+ return true;
+}
+function matches(d,skipKey=null){
+ if(!textAndRangeMatch(d))return false;
+ for(const k of Object.keys(F)){if(k===skipKey||!F[k].size)continue;const v=String(filterVal(d,k)??"");if(FM[k]==="include"&&!F[k].has(v))return false;if(FM[k]==="exclude"&&F[k].has(v))return false}
+ return true;
+}
+function facetBase(key){
+ if(["plate","country","region"].includes(key))return locationBase(key);
+ // Build from the current result set, excluding only this field, so every facet responds to the others.
+ return EXPLORER.filter(d=>matches(d,key));
+}
+function renderGroup(el,key,limit=100){
+ const base=facetBase(key), optionSet=new Set(vals(key,base).map(String));
+ F[key].forEach(v=>optionSet.add(String(v)));
+ const options=[...optionSet].sort((a,b)=>a.localeCompare(b,"zh-Hant",{numeric:true})).slice(0,limit);
+ $(el).innerHTML=options.map(v=>`<button class="chip ${F[key].has(String(v))?"selected":""}" data-v="${esc(v)}">${esc(v)}</button>`).join("")||'<div class="emptyopt">No available options</div>';
+ $(el).querySelectorAll(".chip").forEach(b=>b.onclick=()=>{const v=b.dataset.v;F[key].has(v)?F[key].delete(v):F[key].add(v);if(key==="plate"||key==="country")pruneChildren();if(["plate","country","region"].includes(key))pruneRegime();apply()});
+}
+function pruneChildren(){
+ const cb=new Set(vals("country",locationBase("country")).map(String));F.country.forEach(v=>{if(!cb.has(v))F.country.delete(v)});
+ const rb=new Set(vals("region",locationBase("region")).map(String));F.region.forEach(v=>{if(!rb.has(v))F.region.delete(v)});
+}
+function pruneRegime(){const rb=new Set(vals("regime",locationBase("regime")).map(String));F.regime.forEach(v=>{if(!rb.has(v))F.regime.delete(v)});}
+function renderAllGroups(){
+ renderGroup("plateChips","plate",50);renderGroup("countryChips","country",100);renderGroup("regionChips","region",150);
+ $("plateAvail").textContent=vals("plate",locationBase("plate")).length+" available";$("countryAvail").textContent=vals("country",locationBase("country")).length+" available";$("regionAvail").textContent=vals("region",locationBase("region")).length+" available";
+ renderGroup("regimeChips","regime",120);$("regimeAvail").textContent=vals("regime",locationBase("regime")).length+" available";
+ renderGroup("functionMainChips","function_main",50);renderGroup("siteChips","site_function",100);renderGroup("roleChips","building_role",100);
+ renderGroup("typeMainChips","type_main",100);renderGroup("typeSubChips","type_sub",120);
+ renderGroup("roofChips","roof_type",50);renderGroup("materialChips","material",50);renderGroup("structureChips","structure",100);renderGroup("scaleChips","scale",50);
+ document.querySelectorAll("[data-mode-slot]").forEach(slot=>slot.innerHTML=modeUI(slot.dataset.modeSlot));bindModeUI();
+}
+function apply(){
+ filtered=EXPLORER.filter(d=>matches(d));
+ resultPage=1;
+ $("resultCount").textContent=filtered.length.toLocaleString()+" records";
+ renderAllGroups();
+ renderResults();
+ renderMarkers();
+}
+function resultField(label,value,wide=false){
+ if(value===null||value===undefined||String(value)==="")return "";
+ return `<div class="result-value${wide?" wide":""}"><b>${esc(label)}</b><span>${esc(value)}</span></div>`;
+}
+function resultSection(title,html,cls=""){
+ return html?`<div class="result-section ${cls}"><div class="result-section-title">${esc(title)}</div>${html}</div>`:"";
+}
+function resultDetails(d){
+ const location=[
+   resultField("Main Region",d.plate),resultField("Country",d.country),resultField("Region",d.region),resultField("Address",d.address,true)
+ ].join("");
+ const dating=[
+   resultField("Century · half",d.century),resultField("Year",d.year),resultField("Start Year",d.start_year),resultField("Regime",d.regime),resultField("Era",d.era)
+ ].join("");
+ const functionBlock=[
+   resultField("Function · Main",d.function_main),resultField("Site Function",d.site_function),resultField("Building Role",d.building_role),resultField("Religion",d.religion),resultField("Scale",d.scale)
+ ].join("");
+ const architecture=[
+   resultField("Type · Main",d.type_main),resultField("Type · Sub",d.type_sub),resultField("Roof Type",d.roof_type),resultField("Material",d.material),resultField("Structure",d.structure),resultField("Structure 2",d.structure2)
+ ].join("");
+ const dims=[
+   resultField("層",numericValue(d,"floors","樓層數")),resultField("開間",d.bays),resultField("出檐",d.eaves),resultField("Brackets / 出跳",numericValue(d,"jumps","出跳")),resultField("長",numericValue(d,"length","長")),resultField("高",numericValue(d,"height","高"))
+ ].join("");
+ const existing=[resultField("Condition",d.condition,true),resultField("Note · existing",d.note_existing,true)].join("");
+ return resultSection("LOCATION",`<div class="result-grid result-location">${location}</div>`)
+   +resultSection("DATING",`<div class="result-grid">${dating}</div>`)
+   +resultSection("FUNCTION",`<div class="result-grid">${functionBlock}</div>`)
+   +resultSection("ARCHITECTURE",`<div class="result-grid">${architecture}</div>`)
+   +resultSection("DIMENSIONS",`<div class="result-grid three">${dims}</div>`)
+   +resultSection("EXISTING",`<div class="result-grid">${existing}</div>`);
+}
+function renderResults(targetId=null){
+ const totalPages=Math.max(1,Math.ceil(filtered.length/resultPageSize));
+ if(targetId!=null){const idx=filtered.findIndex(x=>String(x.id)===String(targetId));if(idx>=0)resultPage=Math.floor(idx/resultPageSize)+1}
+ resultPage=Math.min(Math.max(1,resultPage),totalPages);
+ const rows=filtered.slice((resultPage-1)*resultPageSize,resultPage*resultPageSize);
+ $("results").innerHTML=rows.map(d=>{
+   const centuryTag=d.century!=null?`C${esc(d.century)}`:"No half-century";
+   const yearTag=d.year!=null?esc(d.year):"";
+   const quick=[d.function_main,d.type_main,d.roof_type,d.material].filter(Boolean);
+   const dimensions=[
+     numericValue(d,"floors","樓層數")!=null?`Floors ${esc(numericValue(d,"floors","樓層數"))}`:"",
+     d.bays!=null&&d.bays!==""?`Bays ${esc(d.bays)}`:"",
+     d.eaves!=null&&d.eaves!==""?`Eaves ${esc(d.eaves)}`:"",
+     numericValue(d,"jumps","出跳")!=null?`Brackets ${esc(numericValue(d,"jumps","出跳"))}`:""
+   ].filter(Boolean);
+   return `<article class="card ${openedId===d.id?"open":""}" data-id="${esc(d.id)}">
+     <div class="cardhead"><span class="marker-dot" style="background:${colorForCentury(d.century)}"></span><div><div class="title">${esc(d.name||"Untitled building")}</div><div class="meta">${esc(d.id||"")} · ${esc(d.plate||"—")} · ${esc(d.country||"—")}${d.region?" · "+esc(d.region):""}</div></div></div>
+     <div class="result-header-tags">${[centuryTag,yearTag,d.condition,...quick,...dimensions].filter(Boolean).map(x=>`<span class="tag">${esc(x)}</span>`).join("")}</div>
+     <div class="expand">${resultDetails(d)}<div class="actionrow"><button class="action primary" onclick="event.stopPropagation();focusMap('${esc(d.id)}')">Zoom on GIS</button></div></div>
+   </article>`;
+ }).join("")||'<div style="padding:24px;color:var(--muted)">No matching records.</div>';
+ $("resultPager").innerHTML=totalPages>1?`<button id="resultPrev" ${resultPage===1?"disabled":""}>←</button><span>Page ${resultPage} / ${totalPages}</span><button id="resultNext" ${resultPage===totalPages?"disabled":""}>→</button>`:"";
+ if($("resultPrev"))$("resultPrev").onclick=()=>{if(resultPage>1){resultPage--;openedId=null;renderResults()}};
+ if($("resultNext"))$("resultNext").onclick=()=>{if(resultPage<totalPages){resultPage++;openedId=null;renderResults()}};
+ $("results").querySelectorAll(".card").forEach(c=>c.onclick=()=>openResult(c.dataset.id));
+}
+function openResult(id){
+ const d=EXPLORER.find(x=>String(x.id)===String(id));if(!d)return;
+ openedId=d.id;renderResults(d.id);
+ setTimeout(()=>{const card=document.querySelector(`.card[data-id="${CSS.escape(String(d.id))}"]`),panel=document.querySelector(".results-panel"),head=panel?.querySelector(".panelhead");if(card&&panel){const panelRect=panel.getBoundingClientRect(),cardRect=card.getBoundingClientRect(),headH=head?.getBoundingClientRect().height||54;const delta=cardRect.top-(panelRect.top+headH);panel.scrollTo({top:panel.scrollTop+delta,behavior:"smooth"})}},30);
+}
+function popupHTML(d){return `<div class="map-popup"><b>${esc(d.name||"Untitled building")}</b></div>`}
+
+function initMap(){
+ if(gisMap)return gisMap;
+ const el=$("map");if(!el||!window.L)return null;
+ try{
+  gisMap=L.map(el,{zoomControl:true,preferCanvas:true,zoomAnimation:true}).setView([30,110],4);
+  osmLayer=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap contributors"}).addTo(gisMap);
+  gisRenderer=L.canvas({padding:0.5});
+  markerLayer=L.layerGroup().addTo(gisMap);
+  gisMap.on("zoomend",()=>{if(gisMap)requestAnimationFrame(()=>gisMap.invalidateSize({pan:false}));});
+  return gisMap;
+ }catch(e){console.error("GIS initialization failed",e);gisMap=null;return null}
+}
+function ensureMap(){if(!gisMap)initMap();if(gisMap&&!markerLayer)markerLayer=L.layerGroup().addTo(gisMap);return !!gisMap}
+function clearMarkers(){if(!ensureMap())return;markerLayer.clearLayers();markerCache.clear();markers=[]}
+function dateRank(d){
+ const y=typeof d.year==="number"&&isFinite(d.year)?d.year:Infinity;
+ const c=typeof d.century==="number"&&isFinite(d.century)?d.century:Infinity;
+ return [y,c,String(d.id||"")];
+}
+function earlier(a,b){const x=dateRank(a),y=dateRank(b);return x[0]-y[0]||x[1]-y[1]||x[2].localeCompare(y[2])}
+function markerHTML(d){return `<div class="gis-marker" style="background:${colorForCentury(d.century)}"></div>`}
+function renderMarkers(){
+ if(!ensureMap())return;
+ const wanted=new Set(filtered.map(d=>String(d.id)));
+ // Use a single Leaflet Canvas renderer. Thousands of HTML div markers are expensive during pan/zoom;
+ // canvas keeps the same click/popup behavior with far fewer DOM nodes.
+ markerCache.forEach((m,id)=>{if(!wanted.has(id)){markerLayer.removeLayer(m);markerCache.delete(id)}});
+ filtered.forEach(d=>{
+   if(typeof d.lat!=="number"||!isFinite(d.lat)||typeof d.lon!=="number"||!isFinite(d.lon))return;
+   const id=String(d.id); let m=markerCache.get(id);
+   const fill=colorForCentury(d.century);
+   if(!m){
+     m=L.circleMarker([d.lat,d.lon],{
+       radius:4,weight:1,color:"#ffffff",fillColor:fill,fillOpacity:.98,opacity:1,
+       renderer:gisRenderer,interactive:true
+     });
+     m._building=d;m._originalLatLng=L.latLng(d.lat,d.lon);
+     m.bindPopup(popupHTML(d),{minWidth:0,maxWidth:360,closeButton:false,autoPanPadding:[20,20]});
+     m.on("click",e=>{L.DomEvent.stop(e);openResult(m._building.id);m.openPopup()});
+     markerCache.set(id,m);
+   }else{
+     m._building=d;m._originalLatLng=L.latLng(d.lat,d.lon);m.setLatLng([d.lat,d.lon]);
+     m.setStyle({radius:4,fillColor:fill});m.setPopupContent(popupHTML(d));
+   }
+   if(!markerLayer.hasLayer(m))markerLayer.addLayer(m);
+ });
+ markers=[...markerCache.values()];
+ // Canvas draw order: add/bring later buildings first and earliest buildings last,
+ // so the earlier building is physically on top when screen positions overlap.
+ markers.sort((a,b)=>earlier(b._building,a._building));
+ markers.forEach(m=>m.bringToFront());
+}
+function focusMap(id){
+ if(!ensureMap())return;
+ const d=EXPLORER.find(x=>String(x.id)===String(id));if(!d||typeof d.lat!=="number"||typeof d.lon!=="number")return;
+ gisMap.setView([d.lat,d.lon],Math.max(gisMap.getZoom(),12),{animate:true});
+ const m=markers.find(x=>String(x._building.id)===String(id));if(m){m.bringToFront();m.setPopupContent(popupHTML(d));setTimeout(()=>m.openPopup(),180)}
+}
+function useGoogle(){if(!ensureMap())return;if(!googleLayer)googleLayer=L.tileLayer("https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",{maxZoom:20,attribution:"© Google"});if(!gisMap.hasLayer(googleLayer))googleLayer.addTo(gisMap);if(gisMap.hasLayer(osmLayer))gisMap.removeLayer(osmLayer);activeMap="google";$("googleBtn").classList.add("active");$("osmBtn").classList.remove("active");setTimeout(()=>gisMap.invalidateSize({pan:false}),50)}
+function useOSM(){if(!ensureMap())return;if(gisMap.hasLayer(googleLayer))gisMap.removeLayer(googleLayer);if(!gisMap.hasLayer(osmLayer))osmLayer.addTo(gisMap);activeMap="osm";$("osmBtn").classList.add("active");$("googleBtn").classList.remove("active");setTimeout(()=>gisMap.invalidateSize({pan:false}),50)}
+$("osmBtn").onclick=useOSM;$("googleBtn").onclick=useGoogle;
+
+function renderCenturyLegend(){const el=$("legendBins");if(!el)return;el.innerHTML=Object.keys(CENTURY_COLORS).map(Number).sort((a,b)=>a-b).map(k=>`<div class="legend-bin"><i style="background:${CENTURY_COLORS[k]}"></i><span>${k.toFixed(1)}</span></div>`).join("")}
+function setResultsHidden(hidden){$("explorer").classList.toggle("results-hidden",hidden);$("toggleResults").textContent=hidden?"Show":"Hide";requestAnimationFrame(()=>requestAnimationFrame(()=>gisMap?.invalidateSize({pan:false})));}
+function setFiltersHidden(hidden){$("explorer").classList.toggle("filters-hidden",hidden);document.body.classList.toggle("filters-hidden-state",hidden);requestAnimationFrame(()=>requestAnimationFrame(()=>gisMap?.invalidateSize({pan:false})))}
+$("toggleResults").onclick=()=>setResultsHidden(!$("explorer").classList.contains("results-hidden"));
+$("showResults").onclick=()=>setResultsHidden(false);
+$("toggleFilters").onclick=()=>setFiltersHidden(!$("explorer").classList.contains("filters-hidden"));
+$("showFilters").onclick=()=>setFiltersHidden(false);
+
+$("themeBtn").onclick=()=>{const dark=document.documentElement.dataset.theme!=="dark";document.documentElement.dataset.theme=dark?"dark":"light";$("themeBtn").textContent=dark?"☀ Light":"☾ Dark";localStorage.setItem("theme",dark?"dark":"light")};if(localStorage.getItem("theme")==="dark"){document.documentElement.dataset.theme="dark";$("themeBtn").textContent="☀ Light"}
+let applyTimer=null;const scheduleApply=()=>{clearTimeout(applyTimer);applyTimer=setTimeout(apply,90)};["q","religionInput","centuryMin","centuryMax","yearMin","yearMax","eraInput","eavesMin","eavesMax","baysMin","baysMax","floorsMin","floorsMax","jumpMin","jumpMax","lengthMin","lengthMax","heightMin","heightMax"].forEach(id=>$(id).addEventListener("input",scheduleApply));
+$("clear").onclick=()=>{for(const k of Object.keys(F)){F[k].clear();FM[k]="include"}["q","religionInput","centuryMin","centuryMax","yearMin","yearMax","eraInput","eavesMin","eavesMax","baysMin","baysMax","floorsMin","floorsMax","jumpMin","jumpMax","lengthMin","lengthMax","heightMin","heightMax"].forEach(id=>$(id).value="");openedId=null;apply()};
+
+$("navExplorer").onclick=()=>{$("explorer").style.display="grid";$("tableview").style.display="none";$("navExplorer").classList.add("active");$("navData").classList.remove("active");setTimeout(()=>gisMap?.invalidateSize({pan:false}),50)};
+$("navData").onclick=()=>{$("explorer").style.display="none";$("tableview").style.display="block";$("navExplorer").classList.remove("active");$("navData").classList.add("active");renderTable()};
+
+let tableFiltered=[],tableFilters={};
+function tableMatches(d){const q=$("tableSearch").value.trim().toLowerCase();if(q&&!Object.values(d.raw||{}).join(" ").toLowerCase().includes(q))return false;for(const [k,set] of Object.entries(tableFilters))if(set?.size&&!set.has(String(d.raw[k]??"")))return false;return true}
+function tableMatchesExcept(d,skip){const q=$("tableSearch").value.trim().toLowerCase();if(q&&!Object.values(d.raw||{}).join(" ").toLowerCase().includes(q))return false;for(const [k,set] of Object.entries(tableFilters))if(k!==skip&&set?.size&&!set.has(String(d.raw[k]??"")))return false;return true}
+let tableCols=[], tableRowHeight=31, tableViewportStart=0, tableRenderQueued=false;
+function tableVisibleRange(){
+ const wrap=$("tableWrap"), total=tableFiltered.length, h=wrap?.clientHeight||600, scroll=wrap?.scrollTop||0;
+ const start=Math.max(0,Math.floor(scroll/tableRowHeight)-8), count=Math.ceil(h/tableRowHeight)+16;
+ return [start,Math.min(total,start+count)];
+}
+function renderTableBody(){
+ const tbody=$("tableBody"); if(!tbody)return;
+ const [start,end]=tableVisibleRange(), top=start*tableRowHeight, bottom=Math.max(0,(tableFiltered.length-end)*tableRowHeight);
+ const cells=tableFiltered.slice(start,end).map(d=>`<tr>${tableCols.map(c=>`<td>${esc(d.raw[c])}</td>`).join("")}</tr>`).join("");
+ tbody.innerHTML=`<tr class="virtual-spacer"><td colspan="${tableCols.length}" style="height:${top}px;padding:0;border:0"></td></tr>${cells}<tr class="virtual-spacer"><td colspan="${tableCols.length}" style="height:${bottom}px;padding:0;border:0"></td></tr>`;
+ tbody.querySelectorAll("tr:not(.virtual-spacer)").forEach(tr=>tr.addEventListener("dblclick",()=>{}));
+}
+function scheduleTableBody(){if(tableRenderQueued)return;tableRenderQueued=true;requestAnimationFrame(()=>{tableRenderQueued=false;renderTableBody()})}
+function renderTable(){
+ tableFiltered=DATA.filter(tableMatches);tableCols=Object.keys(DATA[0]?.raw||{});$("tableCount").textContent=tableFiltered.length.toLocaleString()+" records";
+ const table=$("table");
+ table.innerHTML=`<thead><tr>${tableCols.map(c=>`<th><div class="throw"><span>${esc(c)}</span><button class="filterbtn" data-col="${esc(c)}">▼</button></div></th>`).join("")}</tr></thead><tbody id="tableBody"></tbody>`;
+ const wrap=$("tableWrap");if(wrap)wrap.scrollTop=0;
+ table.querySelectorAll(".filterbtn").forEach(b=>b.onclick=()=>openFilter(b.dataset.col,b));
+ renderTableBody();
+}
+function openFilter(col,btn){
+ const pop=$("filterPop"),base=DATA.filter(d=>tableMatchesExcept(d,col)),values=[...new Set(base.map(d=>d.raw[col]).filter(v=>v!==null&&v!==undefined&&v!=="").map(String))].sort((a,b)=>a.localeCompare(b,"zh-Hant",{numeric:true})),current=tableFilters[col]||new Set();
+ pop.innerHTML=`<div class="pophead"><span>${esc(col)}</span><button id="closePop" class="filterbtn">×</button></div><input id="optSearch" placeholder="輸入搜尋..."><div class="opts" id="opts">${values.map(v=>`<label class="opt"><input type="checkbox" value="${esc(v)}" ${current.has(v)?"checked":""}><span>${esc(v)}</span></label>`).join("")}</div><div class="popactions"><button id="selectAll">全選</button><button id="clearOne">清除</button><button class="apply" id="applyOne">套用</button></div>`;
+ pop.style.display="block";const r=btn.getBoundingClientRect();pop.style.left=Math.min(r.left,innerWidth-290)+"px";pop.style.top=Math.min(r.bottom+4,innerHeight-430)+"px";
+ $("closePop").onclick=()=>pop.style.display="none";$("optSearch").oninput=()=>{const q=$("optSearch").value.toLowerCase();document.querySelectorAll("#opts .opt").forEach(o=>o.style.display=o.textContent.toLowerCase().includes(q)?"flex":"none")};
+ $("selectAll").onclick=()=>document.querySelectorAll("#opts input").forEach(i=>i.checked=true);$("clearOne").onclick=()=>{tableFilters[col]=new Set();pop.style.display="none";renderTable()};$("applyOne").onclick=()=>{tableFilters[col]=new Set([...document.querySelectorAll("#opts input:checked")].map(i=>i.value));pop.style.display="none";renderTable()}
+}
+$("tableWrap").onscroll=scheduleTableBody;$("tableSearch").oninput=renderTable;$("tableClear").onclick=()=>{tableFilters={};$("tableSearch").value="";renderTable()};
+document.addEventListener("click",e=>{if(!$("filterPop").contains(e.target)&&!e.target.classList.contains("filterbtn"))$("filterPop").style.display="none"});
+
+let resizing=null,sx=0,sf=0,sr=0;
+function begin(which,e){resizing=which;sx=e.clientX;sf=parseInt(getComputedStyle(document.documentElement).getPropertyValue("--filter"))||310;sr=parseInt(getComputedStyle(document.documentElement).getPropertyValue("--results"))||450;e.preventDefault()}
+$("resize1").onmousedown=e=>begin("f",e);$("resize2").onmousedown=e=>begin("r",e);
+document.addEventListener("mousemove",e=>{if(!resizing)return;const dx=e.clientX-sx;if(resizing==="f")document.documentElement.style.setProperty("--filter",Math.max(240,Math.min(520,sf+dx))+"px");else document.documentElement.style.setProperty("--results",Math.max(340,Math.min(720,sr+dx))+"px");gisMap?.invalidateSize({pan:false})});
+document.addEventListener("mouseup",()=>resizing=null);
+
+initMap();
+async function boot(){
+ try{
+  const r=await fetch("data.json?build=1.6",{cache:"no-store"});if(!r.ok)throw new Error(`HTTP ${r.status} loading data.json`);
+  const d=await r.json();if(!Array.isArray(d))throw new Error("data.json is not an array");DATA=d;
+  DATA.forEach(x=>{x.floors=numericValue(x,"floors","樓層數");x.jumps=numericValue(x,"jumps","出跳");x.length=numericValue(x,"length","長");x.height=numericValue(x,"height","高");x._searchText=Object.values(x.raw||{}).join(" ").toLowerCase()});
+  EXPLORER=DATA.filter(x=>typeof x.lat==="number"&&isFinite(x.lat)&&typeof x.lon==="number"&&isFinite(x.lon));
+  $("recordCount").textContent=EXPLORER.length.toLocaleString()+" mapped / "+DATA.length.toLocaleString()+" total";
+  renderCenturyLegend();apply();$("loadingState")?.classList.add("hidden");requestAnimationFrame(()=>gisMap?.invalidateSize({pan:false}));
+ }catch(err){console.error(err);$("loadingState")?.classList.add("hidden");alert("無法載入 data.json。請確認目前資料夾同時有 index.html 與 data.json，並在該資料夾執行 python -m http.server 8000。\n\n"+err.message)}
+}
+boot();
+</script>
+</body></html>

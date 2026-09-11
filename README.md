@@ -1,40 +1,12 @@
-# 中國現存歷代木構建築地圖
+# East Asian Timber Architecture — V1.5
 
-一個基於 QGIS + OpenLayers 的業餘互動式古建築 GIS 地圖，收錄中國歷代（唐～清等）重要古建築點位資訊，包括政權、地區、類型、斗拱、外形、宗教、公元年份等屬性。
+V1.5 updates:
+- Location hierarchy renamed: LOCATION → Main Regions → Country → Region.
+- Main Regions now uses the same multi-select include/exclude treatment as Country.
+- Added numeric filters for 樓層數, 出跳, 長, 高 in Dimensions.
+- GIS buildings without 世紀(半) data are shown in black.
+- Result detail fields now include Address plus the new dimension values.
+- Keeps V1.4 GIS performance improvements and virtualized Database.
 
-支援多條件篩選（政權、地區、類型、斗拱、宗教、年份範圍等），方便了解或欣賞中國古代建築遺產。
-
-## 線上地圖（直接點擊開啟）
-
-🌐 **https://ericleung1222.github.io/ancient-buildings-map/**
-
-**這是一個非常早期的測試版本（v0.1），目前十分簡陋！**
-
-- 資料尚未完整整理，點位數量有限、屬性可能有誤或缺漏
-- 功能還很基礎，篩選邏輯、介面等都還在粗糙階段
-- 許多細節（如樣式、內容資料、網頁錯誤）仍待大幅優化
-- 地圖僅供初步瀏覽與概念驗證，**不適合作為正式研究或引用資料來源**
-
-請以「玩具 / 草稿」心態看待本專案，歡迎提出任何批評、建議或修正！
-
-## 目前主要功能（測試中）
-
-- 基本 OpenLayers 地圖顯示
-- 政權與地區的 checkbox 篩選
-- 部分屬性文字搜尋（類型、斗拱、宗教、外形、功能）
-- 年份數字篩選（支援 = > < 範圍）
-- 點位彈出視窗（顯示基本屬性）
-- 篩選面板可隱藏/顯示
-
-## 未來規劃
-
-- 增加其他建材之建築（eg.磚/石/土/金屬）
-- 增加東亞各國木構建築
-- 優化篩選介面和項目
-- 隨緣更新
-
-## 歡迎提出任何寶貴意見或提供資料
-
-本專案是一個業餘人士的一次業餘嘗試，目前還只是個粗糙的測試版，離真正好用還有很長一段路要走。  
-所以有任何反饋對以後發展有任何想法都歡迎留下你寶貴意見，謝謝。
-  
+## Local test
+Run `python -m http.server 8000` in this folder, then open `http://localhost:8000`.
